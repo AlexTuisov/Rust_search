@@ -1,0 +1,33 @@
+fn heuristic(problem: &FarmProblem, state: &State) -> f64 {
+    let mut threshold_deficit: f64 = 0.0;
+    let mut weighted_sum: f64 = 0.0;
+
+    // Calculate threshold deficit, giving more weight to farms with higher potential impact
+    for (farm, &threshold) in &problem.goal_thresholds {
+        if let Some(&x_value) = state.x_values.get(farm) {
+            if x_value < threshold {
+                let potential_impact = problem.weighted_sum_goal.weights.get(farm).unwrap_or(&1);
+                threshold_deficit += (threshold - x_value) as f64 * *potential_impact as f64;
+            }
+        }
+    }
+
+    // Calculate current weighted sum, emphasizing contributions from high-value mobs
+    for (farm, &weight) in &problem.weighted_sum_goal.weights {
+        if let Some(&x_value) = state.x_values.get(farm) {
+            weighted_sum += (x_value as f64) * (weight as f64 / WeightedSumGoal::SCALE_FACTOR as f64);
+        }
+    }
+
+    // Calculate weighted sum deficit
+    let weighted_sum_deficit = if weighted_sum < (problem.weighted_sum_goal.threshold as f64 / WeightedSumGoal::SCALE_FACTOR as f64) {
+        (problem.weighted_sum_goal.threshold as f64 / WeightedSumGoal::SCALE_FACTOR as f64) - weighted_sum
+    } else {
+        0.0
+    };
+
+    // Combine both deficits to form the heuristic, give slightly more weight to the weighted sum deficit
+    let alpha = 1.0; // Adjust the influence of threshold deficits
+    let beta = 1.5;  // Give more influence to the weighted sum deficit
+    alpha * threshold_deficit + beta * weighted_sum_deficit
+}

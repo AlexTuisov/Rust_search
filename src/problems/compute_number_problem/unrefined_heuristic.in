@@ -1,0 +1,42 @@
+fn heuristic(problem: &ComputeNumberProblem, state: &State) -> f64 {
+    // Retrieve the goal threshold
+    let goal_threshold = match state.get_field("goal_threshold") {
+        Some(Value::Int(value)) => *value,
+        _ => panic!("Expected goal_threshold to be an integer"),
+    };
+
+    // Retrieve buffers from the state
+    let buffers = match state.get_field("buffers") {
+        Some(Value::IntArray(values)) => values,
+        _ => panic!("Expected buffers to be an IntArray"),
+    };
+
+    // Determine the highest buffer value
+    let max_buffer_value = buffers.iter().cloned().max().unwrap_or(0);
+
+    // Calculate distance to the nearest twin prime greater than the goal_threshold
+    let distance_to_nearest_twin_prime = if is_twin_prime(max_buffer_value) && max_buffer_value > goal_threshold {
+        0.0  // Already a goal state
+    } else {
+        // Find the next twin prime greater than the max buffer value
+        let mut target = max_buffer_value + 1;
+        while !is_twin_prime(target) || target <= goal_threshold {
+            target += 1;
+        }
+        (target - max_buffer_value) as f64
+    };
+
+    // Penalize for being non-prime if not already a twin prime
+    let prime_penalty = if !is_prime(max_buffer_value) {
+        1.0  // Arbitrary small penalty for non-prime
+    } else {
+        0.0
+    };
+
+    // Estimated action potential weight
+    // You might want to tweak this based on the complexity of operations
+    let operation_efficiency = 1.0;  // Simplification, adjust based on testing
+
+    // Compute heuristic value
+    distance_to_nearest_twin_prime * operation_efficiency + prime_penalty
+}

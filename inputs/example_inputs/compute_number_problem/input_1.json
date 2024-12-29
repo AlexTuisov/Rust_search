@@ -1,0 +1,5 @@
+{
+  "initial_set": [1, 2],
+  "num_buffers": 2,
+  "goal_threshold": 10000
+}

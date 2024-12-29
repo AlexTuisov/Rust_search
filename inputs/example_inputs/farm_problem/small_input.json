@@ -1,0 +1,27 @@
+{
+  "farms": ["farm0", "farm1"],
+  "initial_state": {
+    "x_values": {
+      "farm0": 600,
+      "farm1": 1
+    },
+    "adjacencies": {
+      "farm0": ["farm1"],
+      "farm1": ["farm0"]
+    },
+    "cost": 0
+  },
+  "goal": {
+    "x_thresholds": {
+      "farm0": 1,
+      "farm1": 1
+    },
+    "weighted_sum_goal": {
+      "weights": {
+        "farm0": 1.0,
+        "farm1": 1.7
+      },
+      "threshold": 840
+    }
+  }
+}

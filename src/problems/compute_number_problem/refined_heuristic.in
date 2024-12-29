@@ -1,0 +1,40 @@
+fn heuristic(problem: &ComputeNumberProblem, state: &State) -> f64 {
+    let goal_threshold = state.goal_threshold;
+
+    let mut best_score = f64::MAX;
+
+    for &buffer in &state.buffers {
+        if buffer > goal_threshold {
+            let score = if is_twin_prime(buffer) {
+                0.0
+            } else {
+                let mut proximity_score = 1.0;
+
+                if is_prime(buffer) {
+                    if is_prime(buffer - 2) || is_prime(buffer + 2) {
+                        proximity_score = 0.1;
+                    }
+                } else {
+                    proximity_score += 0.5;
+                }
+
+                // Encourage larger values
+                proximity_score += ((goal_threshold - buffer).abs() as f64) / 1000.0;
+                proximity_score
+            };
+
+            if score < best_score {
+                best_score = score;
+            }
+        } else {
+            // Penalize significantly for values far below the threshold
+            let score = ((goal_threshold - buffer).abs() as f64) / 100.0 + 10.0;
+
+            if score < best_score {
+                best_score = score;
+            }
+        }
+    }
+
+    best_score
+}

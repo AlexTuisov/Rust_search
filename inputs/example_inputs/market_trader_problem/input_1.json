@@ -1,0 +1,126 @@
+{
+  "init": {
+    "markets": ["Palanga", "Oslo"],
+    "camels": ["camel0"],
+    "goods": [
+      "Food", "ExpensiveRugs", "Coffee", "Cattle", "Water", "Cars",
+      "GummyBears", "Computers", "LaminateFloor", "Copper", "Footballs",
+      "Kittens", "Minerals", "Gold", "Platinum", "DVDs", "TuringMachines"
+    ],
+    "prices": {
+      "Palanga": {
+        "Food": 7.6,
+        "ExpensiveRugs": 8.0,
+        "Coffee": 26.0,
+        "Cattle": 16.0,
+        "Water": 33.2,
+        "Cars": 78.3,
+        "GummyBears": 94.0,
+        "Computers": 61.6,
+        "LaminateFloor": 46.8,
+        "Copper": 31.2,
+        "Footballs": 49.6,
+        "Kittens": 70.3,
+        "Minerals": 12.8,
+        "Gold": 38.8,
+        "Platinum": 68.3,
+        "DVDs": 18.0,
+        "TuringMachines": 21.2
+      },
+      "Oslo": {
+        "Food": 4.3,
+        "ExpensiveRugs": 6.3,
+        "Coffee": 21.2,
+        "Cattle": 8.0,
+        "Water": 25.2,
+        "Cars": 91.2,
+        "GummyBears": 38.0,
+        "Computers": 84.0,
+        "LaminateFloor": 56.3,
+        "Copper": 32.8,
+        "Footballs": 70.3,
+        "Kittens": 56.0,
+        "Minerals": 11.2,
+        "Gold": 37.2,
+        "Platinum": 65.2,
+        "DVDs": 16.3,
+        "TuringMachines": 45.2
+      }
+    },
+    "on_sale": {
+      "Palanga": {
+        "Food": 6,
+        "ExpensiveRugs": 10,
+        "Coffee": 2,
+        "Cattle": 0,
+        "Water": 0,
+        "Cars": 54,
+        "GummyBears": 8,
+        "Computers": 56,
+        "LaminateFloor": 40,
+        "Copper": 17,
+        "Footballs": 29,
+        "Kittens": 0,
+        "Minerals": 53,
+        "Gold": 2,
+        "Platinum": 55,
+        "DVDs": 0,
+        "TuringMachines": 0
+      },
+      "Oslo": {
+        "Food": 14,
+        "ExpensiveRugs": 14,
+        "Coffee": 14,
+        "Cattle": 0,
+        "Water": 15,
+        "Cars": 22,
+        "GummyBears": 0,
+        "Computers": 0,
+        "LaminateFloor": 16,
+        "Copper": 13,
+        "Footballs": 0,
+        "Kittens": 0,
+        "Minerals": 57,
+        "Gold": 6,
+        "Platinum": 63,
+        "DVDs": 0,
+        "TuringMachines": 0
+      }
+    },
+    "bought": {
+      "Food": 0,
+      "ExpensiveRugs": 0,
+      "Coffee": 0,
+      "Cattle": 0,
+      "Water": 0,
+      "Cars": 0,
+      "GummyBears": 0,
+      "Computers": 0,
+      "LaminateFloor": 0,
+      "Copper": 0,
+      "Footballs": 0,
+      "Kittens": 0,
+      "Minerals": 0,
+      "Gold": 0,
+      "Platinum": 0,
+      "DVDs": 0,
+      "TuringMachines": 0
+    },
+    "drive_cost": {
+      "Palanga_Oslo": 4.0,
+      "Oslo_Palanga": 4.0
+    },
+    "location": {
+      "camel0": "Oslo"
+    },
+    "resources": {
+      "cash": 100.0,
+      "capacity": 20,
+      "fuel_used": 0,
+      "fuel": 7.0
+    }
+  },
+  "goal": {
+    "cash": 1000.0
+  }
+}

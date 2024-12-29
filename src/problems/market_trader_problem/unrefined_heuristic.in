@@ -1,0 +1,55 @@
+fn heuristic(problem: &MarketTraderProblem, state: &State) -> f64 {
+    let mut heuristic_value = 0.0;
+
+    // Travel cost estimation
+    for camel in &state.camels {
+        if let Some(desired_location) = problem.goal.conditions.iter()
+            .find(|g| g.parameter == "location")
+            .and_then(|g| if let Value::Text(loc) = &g.value { Some(loc.clone()) } else { None }) 
+        {
+            if let Some(current_location) = state.location.get(camel) {
+                if current_location != &desired_location {
+                    if let Some(cost) = State::drive_cost(state, current_location, &desired_location) {
+                        heuristic_value += cost; // Add travel cost to heuristic
+                    } else {
+                        heuristic_value += 1000.0; // Large penalty if move is not possible
+                    }
+                }
+            }
+        }
+    }
+
+    // Cash requirement estimation
+    if let Some(goal_cash) = problem.goal.conditions.iter()
+        .find(|g| g.parameter == "cash")
+        .and_then(|g| if let Value::Int(cash) = g.value { Some(cash as f64) } else { None })
+    {
+        let state_cash = state.resources.get_cash();
+        if state_cash < goal_cash {
+            heuristic_value += goal_cash - state_cash; // Add cash deficit to heuristic
+        }
+    }
+
+    // Goods management estimation
+    for atomic_goal in &problem.goal.conditions {
+        match atomic_goal.parameter.as_str() {
+            "goods" => {
+                if let Value::Int(goal_quantity) = atomic_goal.value {
+                    for (goods, &bought_quantity) in &state.bought {
+                        if bought_quantity < goal_quantity {
+                            heuristic_value += (goal_quantity - bought_quantity) as f64; // Penalty for each good deficit
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    // Capacity and resource checks
+    if state.resources.capacity < 20 { // Assuming 20 is a critical capacity threshold
+        heuristic_value += (20 - state.resources.capacity) as f64; // Penalty for low capacity
+    }
+
+    heuristic_value // Lower heuristic values are better
+}
