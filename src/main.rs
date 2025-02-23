@@ -54,6 +54,7 @@ where
             let action_names: Vec<_> = actions.iter().map(|action| &action.name).collect();
             println!("Solution found with actions: {:?}", action_names);
             println!("Total cost of actions: {}", total_cost);
+            println!("Total length of the solution: {}", action_names.len());
         }
         Err(msg) => {
             println!("Search failed: {}", msg);
@@ -63,8 +64,8 @@ where
 
 fn main() {
     let start_time = Instant::now();
-    solve_problem::<ComputeNumberProblem>(
-        "inputs/example_inputs/compute_number_problem/input_1.json",
+    solve_problem::<MarketTraderProblem>(
+        "inputs/example_inputs/market_trader_problem/input_1.json",
         "GBFS",
     );
 
