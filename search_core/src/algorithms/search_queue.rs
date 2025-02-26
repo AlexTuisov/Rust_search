@@ -4,7 +4,7 @@ use crate::algorithms::gbfs::GBFSQueue;
 use crate::algorithms::bfs::BfsQueue;
 use crate::algorithms::dfs::DfsQueue;
 
-pub(crate) enum SearchQueue {
+pub enum SearchQueue {
     AStar(AStarQueue),
     GBFS(GBFSQueue),
     BFS(BfsQueue),
