@@ -1,5 +1,4 @@
-use crate::search::{node::Node, state::StateTrait, action::Action};
-use std::rc::Rc;
+use crate::search::{action::Action, state::StateTrait};
 
 pub trait Problem {
     type State: StateTrait; // Associated type for State

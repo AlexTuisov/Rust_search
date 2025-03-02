@@ -1,0 +1,12 @@
+[package]
+name = "rust_search_module"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]  # Required for a Python extension module
+
+[dependencies]
+pyo3 = { version = "0.18", features = ["extension-module"] }
+search_core = { path = "../search_core" }  # Access the same core logic
+
