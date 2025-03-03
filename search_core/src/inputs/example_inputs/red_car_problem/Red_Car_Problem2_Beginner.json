@@ -1,0 +1,16 @@
+{
+    "grid": { "row_size": 6, "col_size": 6 },
+    "cost": 0,
+    "vehicles": [
+      { "name": "green-car", "kind": "VerticalCar", "position": [1, 0] },
+      { "name": "orange-car", "kind": "VerticalCar", "position": [1, 1] },
+      { "name": "pink-car", "kind": "VerticalCar", "position": [1, 4] },
+      { "name": "green-over-car", "kind": "VerticalCar", "position": [2, 2] },
+      { "name": "white-car", "kind": "VerticalCar", "position": [4, 2] },
+      { "name": "gray-car", "kind": "VerticalCar", "position": [3, 4] },
+      { "name": "red-car", "kind": "HorizontalCar", "position": [2, 0] },
+      { "name": "blue-car", "kind": "HorizontalCar", "position": [0, 2] },
+      { "name": "purple-car", "kind": "HorizontalCar", "position": [1, 2] },
+      { "name": "yellow-truck", "kind": "VerticalTruck", "position": [2, 3] }
+    ]
+  }
