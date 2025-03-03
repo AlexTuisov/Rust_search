@@ -3,6 +3,7 @@ use search_core::search::solve::solve_problem;
 use search_core::problems::farm_problem::farm_problem::FarmProblem;
 use search_core::problems::market_trader_problem::market_trader_problem::MarketTraderProblem;
 use search_core::problems::compute_number_problem::compute_number_problem::ComputeNumberProblem;
+use search_core::problems::compute_number_problem::compute_number_problem::RedCarProblem;
 use time::Instant;
 
 fn main() {
