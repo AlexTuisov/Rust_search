@@ -19,34 +19,38 @@ impl State {}
 impl StateTrait for State {}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct LinearExpr {
-    /// Each term is a pair: (coefficient, counter name).
-    pub terms: Vec<(i32, String)>,
-    /// A constant term to add.
-    pub constant: i32,
+pub enum Expression {
+    Value(String),                         // e.g., represents counter "c0"
+    Constant(i32),                         // a constant value
+    Add(Box<Expression>, Box<Expression>), // addition: e1 + e2
+    Sub(Box<Expression>, Box<Expression>), // subtraction: e1 - e2
+    Mul(Box<Expression>, Box<Expression>), // multiplication: e1 * e2
 }
 
-impl LinearExpr {
+impl Expression {
     /// Evaluates the expression based on the current state.
     pub fn evaluate(&self, state: &State) -> i32 {
-        let mut sum = self.constant;
-        for (coeff, name) in &self.terms {
-            // Assume that state.counters has a field `name`.
-            if let Some(counter) = state.counters.iter().find(|c| c.name == *name) {
-                sum += coeff * counter.value;
-            } else {
-                panic!("Counter {} not found in state", name);
+        match self {
+            Expression::Value(name) => {
+                if let Some(counter) = state.counters.iter().find(|c| c.name == *name) {
+                    counter.value
+                } else {
+                    panic!("Counter {} not found in state", name);
+                }
             }
+            Expression::Constant(n) => *n,
+            Expression::Add(e1, e2) => e1.evaluate(state) + e2.evaluate(state),
+            Expression::Sub(e1, e2) => e1.evaluate(state) - e2.evaluate(state),
+            Expression::Mul(e1, e2) => e1.evaluate(state) * e2.evaluate(state),
         }
-        sum
     }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Condition {
-    pub left: LinearExpr,
+    pub left: Expression,
     pub operator: String, // e.g., "=", "<=", "<", ">", ">="
-    pub right: LinearExpr,
+    pub right: Expression,
 }
 
 impl Condition {
@@ -85,7 +89,7 @@ pub struct Counter {
 }
 
 impl Counter {
-    /// Creates a new Person with the given parameters.
+    /// Creates a new Counter with the given parameters.
     pub fn new(name: String, rate_value: i32, value: i32) -> Self {
         Counter {
             name,
@@ -96,12 +100,12 @@ impl Counter {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct FoCountersProblem {
+pub struct FoCountersExpressionProblem {
     pub max_value: i32,
     pub goal: Goal,
 }
 
-impl FoCountersProblem {
+impl FoCountersExpressionProblem {
     pub fn get_increase_action(counter: &Counter) -> Action {
         let mut parameters = std::collections::HashMap::new();
         let action_name = format!("increase_counter{}", counter.name);
@@ -246,11 +250,68 @@ impl FoCountersProblem {
 
         new_state
     }
+    pub fn parse_expression(expr_str: &str) -> Expression {
+        let tokens: Vec<&str> = expr_str.split_whitespace().collect();
+
+        if tokens.len() == 1 {
+            if let Ok(num) = tokens[0].parse::<i32>() {
+                return Expression::Constant(num);
+            }
+            return Expression::Value(tokens[0].to_string());
+        }
+
+        // Find the last operator with two operands (to handle nested expressions correctly).
+        let mut operator_idx = None;
+        let mut depth = 0;
+
+        for (i, &token) in tokens.iter().enumerate() {
+            match token {
+                "(" => depth += 1,
+                ")" => depth -= 1,
+                "+" | "-" | "*" if depth == 0 => operator_idx = Some(i),
+                _ => {}
+            }
+        }
+
+        if let Some(idx) = operator_idx {
+            let left = Self::parse_expression(&tokens[..idx].join(" "));
+            let right = Self::parse_expression(&tokens[idx + 1..].join(" "));
+
+            match tokens[idx] {
+                "+" => return Expression::Add(Box::new(left), Box::new(right)),
+                "-" => return Expression::Sub(Box::new(left), Box::new(right)),
+                "*" => return Expression::Mul(Box::new(left), Box::new(right)),
+                _ => panic!("Unknown operator: {}", tokens[idx]),
+            }
+        }
+
+        panic!("Invalid expression: {}", expr_str);
+    }
+    pub fn parse_condition(cond_str: &str) -> (Expression, String, Expression) {
+        let cond_clean = cond_str
+            .replace("(", "")
+            .replace(")", "")
+            .trim()
+            .to_string();
+        let parts: Vec<&str> = cond_clean.split_whitespace().collect();
+
+        if parts.len() < 3 {
+            panic!("Invalid condition format: {}", cond_clean);
+        }
+
+        // The last two tokens are always the operator and right-hand side.
+        let operator = parts[parts.len() - 2].to_string();
+        let right_expr = Self::parse_expression(parts[parts.len() - 1]);
+
+        // The left-hand side is everything before the operator.
+        let left_expr = Self::parse_expression(&parts[..parts.len() - 2].join(" "));
+
+        (left_expr, operator, right_expr)
+    }
 }
 
-impl Problem for FoCountersProblem {
+impl Problem for FoCountersExpressionProblem {
     type State = State;
-
     fn get_possible_actions(&self, state: &State) -> Vec<Action> {
         self.get_actions(state)
     }
@@ -290,30 +351,12 @@ impl Problem for FoCountersProblem {
         let mut counters = Vec::new();
         if let Some(obj) = counters_map.as_object() {
             for (key, value) in obj.iter() {
-                // If the counter is stored as an integer, use that as its value.
-                // Otherwise, expect an object with fields "value" and optionally "rate_value".
-                let counter_value;
-                let rate_value;
-                if let Some(val) = value.as_i64() {
-                    counter_value = val as i32;
-                    rate_value = 0;
-                } else if let Some(obj_val) = value.as_object() {
-                    counter_value = obj_val
-                        .get("value")
-                        .and_then(|v| v.as_i64())
-                        .expect("Missing 'value' field in counter")
-                        as i32;
-                    rate_value = obj_val
-                        .get("rate_value")
-                        .and_then(|v| v.as_i64())
-                        .unwrap_or(0) as i32;
-                } else {
-                    panic!("Counter {} is not in the expected format", key);
-                }
-                // Here we name the counter as "c{key}".
-                let mut counter = Counter::new(format!("c{}", key), rate_value, counter_value);
-
-                counters.push(counter);
+                let counter_value = value.get("value").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
+                let rate_value = value
+                    .get("rate_value")
+                    .and_then(|v| v.as_i64())
+                    .unwrap_or(0) as i32;
+                counters.push(Counter::new(format!("c{}", key), rate_value, counter_value));
             }
         }
 
@@ -331,52 +374,19 @@ impl Problem for FoCountersProblem {
                     .as_str()
                     .expect("Expected goal condition to be a string");
 
-                // Remove all parentheses to get a cleaner format.
-                let cond_clean = cond_str
-                    .replace("(", "")
-                    .replace(")", "")
-                    .trim()
-                    .to_string();
-                let parts: Vec<&str> = cond_clean.split_whitespace().collect();
-                if parts.len() != 3 {
-                    panic!(
-                        "Invalid condition format (expected 3 tokens): {}",
-                        cond_clean
-                    );
-                }
-                let left_expr_str = parts[0]; // e.g., "c0+1"
-                let operator = parts[1]; // e.g., "<=" or ">="
-                let right_expr_str = parts[2]; // e.g., "c1"
-
-                // Parse the left-hand side: split on '+'.
-                let left_parts: Vec<&str> = left_expr_str.split('+').collect();
-                if left_parts.len() != 2 {
-                    panic!("Invalid left expression format: {}", left_expr_str);
-                }
-                let left_counter = left_parts[0].to_string(); // e.g., "c0"
-                let left_offset = left_parts[1]
-                    .parse::<i32>()
-                    .expect("Invalid offset in left expression");
-
-                let left_expr = LinearExpr {
-                    terms: vec![(1, left_counter)],
-                    constant: left_offset,
-                };
-
-                let right_expr = LinearExpr {
-                    terms: vec![(1, right_expr_str.to_string())],
-                    constant: 0,
-                };
+                // Parse condition using a recursive parser.
+                let (left_expr, operator, right_expr) = Self::parse_condition(cond_str);
 
                 let condition = Condition {
                     left: left_expr,
-                    operator: operator.to_string(),
+                    operator,
                     right: right_expr,
                 };
 
                 conditions.push(condition);
             }
         }
+
         let goal = Goal { conditions };
 
         // Parse max_value if present, default to 48 otherwise.
@@ -386,7 +396,7 @@ impl Problem for FoCountersProblem {
             .map(|v| v as i32)
             .unwrap_or(48);
 
-        let problem = FoCountersProblem { max_value, goal };
+        let problem = FoCountersExpressionProblem { max_value, goal };
 
         (state, problem)
     }

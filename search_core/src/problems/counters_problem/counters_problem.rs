@@ -212,7 +212,6 @@ impl Problem for CountersProblem {
                 // Here we name the counter as "c{key}".
                 counters.push(Counter::new(format!("c{}", key), val));
             }
-        } else {
         }
 
         let state = State { counters };
@@ -225,38 +224,57 @@ impl Problem for CountersProblem {
                 let cond_str = value
                     .as_str()
                     .expect("Expected goal condition to be a string");
-                // Expect condition string in the format "c0+1 <= c1"
-                let parts: Vec<&str> = cond_str.split_whitespace().collect();
-                if parts.len() != 3 {
-                    panic!("Invalid condition format: {}", cond_str);
-                }
-                let left_expr_str = parts[0]; // e.g., "c0+1"
-                let operator = parts[1]; // e.g., "<="
-                let right_expr_str = parts[2]; // e.g., "c1"
 
-                // Parse the left-hand side: split on '+'
-                let left_parts: Vec<&str> = left_expr_str.split('+').collect();
-                if left_parts.len() != 2 {
-                    panic!("Invalid left expression format: {}", left_expr_str);
-                }
-                let left_counter = left_parts[0].to_string(); // "c0"
-                let left_offset = left_parts[1]
-                    .parse::<i32>()
-                    .expect("Invalid offset in left expression");
+                // Remove extra spaces and ensure a proper split.
+                let cond_clean = cond_str
+                    .replace("(", "")
+                    .replace(")", "")
+                    .trim()
+                    .to_string();
+                let parts: Vec<&str> = cond_clean.split_whitespace().collect();
 
-                let left_expr = LinearExpr {
-                    terms: vec![(1, left_counter)],
-                    constant: left_offset,
+                if parts.len() != 5 {
+                    panic!(
+                        "Invalid condition format (expected 5 tokens): {}",
+                        cond_clean
+                    );
+                }
+
+                let left_counter = parts[0].to_string(); // e.g., "c0"
+                let left_op = parts[1]; // e.g., "+"
+                let left_offset: i32 = parts[2].parse().expect("Invalid offset in left expression");
+                let operator = parts[3].to_string(); // e.g., "<="
+                let right_counter = parts[4].to_string(); // e.g., "c1"
+
+                let left_expr = match left_op {
+                    "+" => {
+                        if left_offset == 0 {
+                            LinearExpr {
+                                terms: vec![(1, left_counter.clone())],
+                                constant: 0,
+                            }
+                        } else {
+                            LinearExpr {
+                                terms: vec![(1, left_counter.clone())],
+                                constant: left_offset,
+                            }
+                        }
+                    }
+                    "-" => LinearExpr {
+                        terms: vec![(1, left_counter.clone())],
+                        constant: -left_offset,
+                    },
+                    _ => panic!("Invalid operator in left expression: {}", left_op),
                 };
 
                 let right_expr = LinearExpr {
-                    terms: vec![(1, right_expr_str.to_string())],
+                    terms: vec![(1, right_counter)],
                     constant: 0,
                 };
 
                 let condition = Condition {
                     left: left_expr,
-                    operator: operator.to_string(),
+                    operator,
                     right: right_expr,
                 };
 

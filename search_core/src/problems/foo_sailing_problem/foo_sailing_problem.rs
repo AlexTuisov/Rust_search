@@ -9,7 +9,6 @@ use std::io::BufReader;
 
 use ordered_float::OrderedFloat;
 
-
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Boat {
     pub x: OrderedFloat<f64>,
@@ -47,7 +46,6 @@ impl Person {
         }
     }
 }
-
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
@@ -188,8 +186,8 @@ impl FooSailingProblem {
             _ => panic!("Action parameters do not contain a valid boat index."),
         };
         let v_val = new_state.boats[boat_index].v;
-        new_state.boats[boat_index].x +=v_val* ordered_float::OrderedFloat(1.5);
-        new_state.boats[boat_index].y += v_val*ordered_float::OrderedFloat(1.5);
+        new_state.boats[boat_index].x += v_val * ordered_float::OrderedFloat(1.5);
+        new_state.boats[boat_index].y += v_val * ordered_float::OrderedFloat(1.5);
 
         new_state
     }
@@ -200,8 +198,8 @@ impl FooSailingProblem {
             _ => panic!("Action parameters do not contain a valid boat index."),
         };
         let v_val = new_state.boats[boat_index].v;
-        new_state.boats[boat_index].x += v_val  * ordered_float::OrderedFloat(1.5);
-        new_state.boats[boat_index].y -= v_val  * ordered_float::OrderedFloat(1.5);
+        new_state.boats[boat_index].x += v_val * ordered_float::OrderedFloat(1.5);
+        new_state.boats[boat_index].y -= v_val * ordered_float::OrderedFloat(1.5);
 
         new_state
     }
@@ -245,7 +243,7 @@ impl FooSailingProblem {
             Some(Value::Int(i)) => *i as usize, // Dereference and cast to usize.
             _ => panic!("Action parameters do not contain a valid boat index."),
         };
-        let v_val = new_state.boats[boat_index].v; 
+        let v_val = new_state.boats[boat_index].v;
 
         new_state.boats[boat_index].x -= v_val * ordered_float::OrderedFloat(2.0);
         new_state.boats[boat_index].y -= v_val * ordered_float::OrderedFloat(2.0);
@@ -258,7 +256,7 @@ impl FooSailingProblem {
             Some(Value::Int(i)) => *i as usize, // Dereference and cast to usize.
             _ => panic!("Action parameters do not contain a valid boat index."),
         };
-        let v_val = new_state.boats[boat_index].v; 
+        let v_val = new_state.boats[boat_index].v;
         new_state.boats[boat_index].y -= v_val * ordered_float::OrderedFloat(2.0);
 
         new_state
@@ -348,7 +346,7 @@ impl Problem for FooSailingProblem {
     fn is_goal_state(&self, state: &State) -> bool {
         for person in &state.persons {
             if !person.saved {
-              return false;
+                return false;
             }
         }
         true
@@ -386,14 +384,13 @@ impl Problem for FooSailingProblem {
                     .get("v")
                     .and_then(|v| v.as_f64())
                     .expect("Missing or invalid 'v' for a boat");
-                let index = boat
-                    .get("index")
-                    .and_then(|v| v.as_u64())
-                    .expect("Missing or invalid 'index' for a boat")
-                    as i32;
+                let index =
+                    boat.get("index")
+                        .and_then(|v| v.as_u64())
+                        .expect("Missing or invalid 'index' for a boat") as i32;
                 boats.push(Boat {
-                    x : ordered_float::OrderedFloat(x),
-                    y : ordered_float::OrderedFloat(y),
+                    x: ordered_float::OrderedFloat(x),
+                    y: ordered_float::OrderedFloat(y),
                     v: ordered_float::OrderedFloat(v_val),
                     index,
                 });
@@ -419,7 +416,11 @@ impl Problem for FooSailingProblem {
                     .and_then(|v| v.as_u64())
                     .expect("Missing or invalid 'index' for a person")
                     as i32;
-                persons.push(Person { d : ordered_float::OrderedFloat(d), saved, index });
+                persons.push(Person {
+                    d: ordered_float::OrderedFloat(d),
+                    saved,
+                    index,
+                });
             }
         } else {
             panic!("Missing 'persons' array in JSON");
