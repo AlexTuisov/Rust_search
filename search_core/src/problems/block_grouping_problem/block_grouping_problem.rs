@@ -1,15 +1,9 @@
 use crate::problems::problem::Problem;
-use crate::search::{action::Action, state::Position, state::StateTrait, state::Value};
-use serde::de::{self, Deserializer, MapAccess, Visitor};
+use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
-use serde_json::{from_reader, Value as JsonValue};
-use std::collections::BTreeMap;
-use std::collections::HashMap;
-use std::error::Error;
-use std::fmt;
+use serde_json::{Value as JsonValue};
 use std::fs;
-use std::fs::File;
-use std::io::BufReader;
+
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
@@ -97,7 +91,7 @@ impl BlockGroupingProblem {
             Some(Value::Int(index)) => *index,
             _ => panic!("Action parameters do not contain a valid index for block."),
         };
-        if let Some(block) = (new_state.blocks.iter_mut().find(|b| b.index == block_index)) {
+        if let Some(block) = new_state.blocks.iter_mut().find(|b| b.index == block_index) {
             block.y += 1;
         } else {
             panic!("Block with index {} not found", block_index);
@@ -110,7 +104,7 @@ impl BlockGroupingProblem {
             Some(Value::Int(index)) => *index,
             _ => panic!("Action parameters do not contain a valid index for block."),
         };
-        if let Some(block) = (new_state.blocks.iter_mut().find(|b| b.index == block_index)) {
+        if let Some(block) = new_state.blocks.iter_mut().find(|b| b.index == block_index) {
             block.y -= 1;
         } else {
             panic!("Block with index {} not found", block_index);
@@ -123,7 +117,7 @@ impl BlockGroupingProblem {
             Some(Value::Int(index)) => *index,
             _ => panic!("Action parameters do not contain a valid index for block."),
         };
-        if let Some(block) = (new_state.blocks.iter_mut().find(|b| b.index == block_index)) {
+        if let Some(block) = new_state.blocks.iter_mut().find(|b| b.index == block_index) {
             block.x += 1;
         } else {
             panic!("Block with index {} not found", block_index);

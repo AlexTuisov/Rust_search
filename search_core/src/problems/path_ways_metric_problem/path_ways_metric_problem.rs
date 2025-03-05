@@ -1,12 +1,9 @@
 use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
-use serde_json::{from_reader, Value as JsonValue};
-use std::collections::HashMap;
-use std::error::Error;
+use serde_json::{Value as JsonValue};
 use std::fs;
-use std::fs::File;
-use std::io::BufReader;
+
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
@@ -337,7 +334,7 @@ impl PathWaysMetricProblem {
                 .iter()
                 .find(|s| s.name == reaction.molecule_1_name);
 
-            if let (Some(mol1)) = (mol1_opt) {
+            if let (Some(mol1)) = mol1_opt {
                 // Check preconditions:
                 if mol1.available >= reaction.need_molecule_1 {
                     actions.push(Self::get_self_associate_with_catalyze_action(reaction));
@@ -356,7 +353,7 @@ impl PathWaysMetricProblem {
                 .iter()
                 .find(|s| s.name == reaction.molecule_1_name);
 
-            if let (Some(mol1)) = (mol1_opt) {
+            if let (Some(mol1)) = mol1_opt {
                 // Check preconditions:
                 if mol1.available >= reaction.need_molecule_1 {
                     actions.push(Self::get_synthesize_action(reaction));
@@ -372,10 +369,10 @@ impl PathWaysMetricProblem {
             Some(Value::Text(name)) => name,
             _ => panic!("Action parameters do not contain a valid name for simple."),
         };
-        if let Some(simple) = (new_state
+        if let Some(simple) = new_state
             .simples
             .iter_mut()
-            .find(|s| s.name == *simple_name))
+            .find(|s| s.name == *simple_name)
         {
             simple.chosen = true;
             simple.possible = false;
@@ -392,10 +389,10 @@ impl PathWaysMetricProblem {
             Some(Value::Text(name)) => name,
             _ => panic!("Action parameters do not contain a valid name for simple."),
         };
-        if let Some(simple) = (new_state
+        if let Some(simple) = new_state
             .simples
             .iter_mut()
-            .find(|s| s.name == *simple_name))
+            .find(|s| s.name == *simple_name)
         {
             simple.available += 1;
         } else {
@@ -545,10 +542,10 @@ impl PathWaysMetricProblem {
             Some(Value::Int(prod)) => *prod,
             _ => panic!("Action parameters do not contain a valid prod for simple."),
         };
-        if let Some(simple) = (new_state
+        if let Some(simple) = new_state
             .simples
             .iter_mut()
-            .find(|s| s.name == *simple_name))
+            .find(|s| s.name == *simple_name)
         {
             simple.available += simple_prod;
         } else {
