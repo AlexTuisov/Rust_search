@@ -7,14 +7,15 @@ use search_core::problems::fo_counters_problem::fo_counters_problem::FoCountersP
 use search_core::problems::foo_sailing_problem::foo_sailing_problem::FooSailingProblem;
 use search_core::problems::market_trader_problem::market_trader_problem::MarketTraderProblem;
 use search_core::problems::red_car_problem::red_car_problem::RedCarProblem;
+use search_core::problems::ext_plant_watering_problem::ext_plant_watering_problem::ExtPlantWateringProblem;
 use search_core::search::solve::solve_problem;
 use std::time;
 use time::Instant;
 
 fn main() {
     let start_time = Instant::now();
-    solve_problem::<FoCountersExpressionProblem>(
-        "search_core/src/inputs/example_inputs/fo_counters_expression_problem/pfile4.json",
+    solve_problem::<ExtPlantWateringProblem>(
+        "search_core/src/inputs/example_inputs/ext_plant_watering_problem/pfile2.json",
         "A*",
     );
 
