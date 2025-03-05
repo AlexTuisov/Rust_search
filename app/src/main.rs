@@ -16,8 +16,8 @@ use time::Instant;
 
 fn main() {
     let start_time = Instant::now();
-    solve_problem::<BlockGroupingProblem>(
-        "search_core/src/inputs/example_inputs/block_grouping_problem/problems_json/pfile1.json",
+    solve_problem::<ExtPlantWateringProblem>(
+        "search_core/src/inputs/example_inputs/ext_plant_watering_problem/problems_json/pfile1.json",
         "A*",
     );
 
