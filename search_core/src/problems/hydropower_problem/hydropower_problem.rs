@@ -26,23 +26,47 @@ pub struct HydropowerProblem {
 impl HydropowerProblem {
     pub fn possible_advance_time_actions(state: &State) -> Action {
         let mut parameters = HashMap::new();
-        parameters.insert( "from".to_string(), Value::Text(state.current_time.to_string()),);
-        parameters.insert("to".to_string(),Value::Text((state.current_time + 1).to_string()),);
-        Action::new(format!( "advance_time_{}_{}",state.current_time, state.current_time + 1),1,parameters,)
+        parameters.insert(
+            "from".to_string(),
+            Value::Text(state.current_time.to_string()),
+        );
+        parameters.insert(
+            "to".to_string(),
+            Value::Text((state.current_time + 1).to_string()),
+        );
+        Action::new(
+            format!(
+                "advance_time_{}_{}",
+                state.current_time,
+                state.current_time + 1
+            ),
+            1,
+            parameters,
+        )
     }
 
     pub fn possible_pump_water_actions(state: &State) -> Action {
         let current_demand = &state.demand.get(&state.current_time).unwrap();
         let mut parameters = HashMap::new();
-        parameters.insert("time".to_string(),Value::Text(state.current_time.to_string()),);
+        parameters.insert(
+            "time".to_string(),
+            Value::Text(state.current_time.to_string()),
+        );
         parameters.insert("demand".to_string(), Value::Int(**current_demand));
-        Action::new( format!("pump_water_up_{}", state.current_time),1,parameters, )
+        Action::new(
+            format!("pump_water_up_{}", state.current_time),
+            1,
+            parameters,
+        )
     }
 
     pub fn possible_generate_actions(state: &State) -> Action {
         let current_demand = &state.demand.get(&state.current_time).unwrap();
         let mut parameters = HashMap::new();
-        parameters.insert( "time".to_string(), Value::Text(state.current_time.to_string()),);
+        parameters.insert(
+            "time".to_string(),
+            Value::Text(state.current_time.to_string()),
+        );
         parameters.insert("demand".to_string(), Value::Int(**current_demand));
         Action::new(format!("generate_{}", state.current_time), 1, parameters)
     }

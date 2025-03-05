@@ -2,7 +2,6 @@
 // use std::rc::{Rc, Weak};
 use crate::search::{action::Action, state::StateTrait};
 
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct Node<S: StateTrait> {
     pub state: S,
@@ -23,5 +22,3 @@ impl<S: StateTrait> Node<S> {
         }
     }
 }
-
-

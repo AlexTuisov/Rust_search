@@ -411,7 +411,6 @@
 //         }
 //         false
 //     } */
-
 //     fn heuristic(&self, state: &State) -> f64 {
 //         // heuristic is imported during build time from include!("refined_heuristic.in")
 //         //heuristic(self, state)

@@ -1,12 +1,12 @@
+use crate::algorithms::astar::AStarQueue;
 use crate::algorithms::bfs::BfsQueue;
 use crate::algorithms::dfs::DfsQueue;
-use crate::algorithms::astar::AStarQueue;
 use crate::algorithms::gbfs::GBFSQueue;
 use crate::algorithms::search_queue::SearchQueue;
 use crate::problems::problem::Problem;
-use crate::search::search_tree::SearchTree;
-use crate::search::search::generic_search;
 use crate::search::node::Node;
+use crate::search::search::generic_search;
+use crate::search::search_tree::SearchTree;
 
 pub fn solve_problem<P>(json_path: &str, search_strategy: &str)
 where

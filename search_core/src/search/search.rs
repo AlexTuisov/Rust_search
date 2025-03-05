@@ -1,6 +1,6 @@
 use crate::algorithms::priority_queue::PriorityQueue;
-use crate::search::search_tree::SearchTree;
 use crate::search::action::Action;
+use crate::search::search_tree::SearchTree;
 use crate::search::state::StateTrait;
 use std::collections::HashSet;
 
@@ -59,7 +59,3 @@ where
 
     Err("No solution found")
 }
-
-
-
-

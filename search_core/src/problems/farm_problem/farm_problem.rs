@@ -6,16 +6,14 @@ use std::collections::{BTreeMap, HashMap};
 
 include!("refined_heuristic.in");
 
-
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
-    pub x_values: BTreeMap<String, i32>,              // Maps farms to their x values
-    pub adjacencies: BTreeMap<String, Vec<String>>,   // Maps farms to their neighbors
-    pub goal_thresholds: BTreeMap<String, i32>,       // Maps farms to their goal thresholds
-    pub weighted_sum_goal: WeightedSumGoal,           // Stores weighted sum goal weights and threshold
-    pub cost: i32,                                    // Total cost accumulated
+    pub x_values: BTreeMap<String, i32>, // Maps farms to their x values
+    pub adjacencies: BTreeMap<String, Vec<String>>, // Maps farms to their neighbors
+    pub goal_thresholds: BTreeMap<String, i32>, // Maps farms to their goal thresholds
+    pub weighted_sum_goal: WeightedSumGoal, // Stores weighted sum goal weights and threshold
+    pub cost: i32,                       // Total cost accumulated
 }
-
 
 impl State {
     pub fn new() -> Self {
@@ -32,16 +30,14 @@ impl State {
     }
 }
 
-impl State {
-}
+impl State {}
 
-impl StateTrait for State{
-}
+impl StateTrait for State {}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct WeightedSumGoal {
     pub weights: BTreeMap<String, i64>, // Scaled weights for hashing
-    pub threshold: i64,                // Scaled threshold for hashing
+    pub threshold: i64,                 // Scaled threshold for hashing
 }
 
 impl WeightedSumGoal {
@@ -69,13 +65,12 @@ impl WeightedSumGoal {
     }
 }
 
-
 pub struct FarmProblem {
-    pub farms: Vec<String>,               // List of farms
-    pub x_values: BTreeMap<String, i32>,  // X values for each farm
-    pub adjacencies: BTreeMap<String, Vec<String>>,  // Adjacencies between farms     // Initial cost
-    pub goal_thresholds: BTreeMap<String, i32>,      // Goal thresholds for each farm
-    pub weighted_sum_goal: WeightedSumGoal,          // Weighted sum goal
+    pub farms: Vec<String>,                         // List of farms
+    pub x_values: BTreeMap<String, i32>,            // X values for each farm
+    pub adjacencies: BTreeMap<String, Vec<String>>, // Adjacencies between farms     // Initial cost
+    pub goal_thresholds: BTreeMap<String, i32>,     // Goal thresholds for each farm
+    pub weighted_sum_goal: WeightedSumGoal,         // Weighted sum goal
 }
 impl FarmProblem {
     // Constructor that takes a path to a JSON file and loads the data
@@ -114,9 +109,7 @@ impl FarmProblem {
             .as_object()
             .unwrap()
             .iter()
-            .map(|(farm, threshold)| {
-                (farm.clone(), threshold.as_i64().unwrap() as i32)
-            })
+            .map(|(farm, threshold)| (farm.clone(), threshold.as_i64().unwrap() as i32))
             .collect::<BTreeMap<_, _>>();
 
         // Parse weighted sum goal with scaled values
@@ -128,7 +121,9 @@ impl FarmProblem {
             .collect::<BTreeMap<_, _>>();
         let weighted_sum_goal = WeightedSumGoal::new(
             weights,
-            json["goal"]["weighted_sum_goal"]["threshold"].as_f64().unwrap(),
+            json["goal"]["weighted_sum_goal"]["threshold"]
+                .as_f64()
+                .unwrap(),
         );
 
         // Parse and initialize the State
@@ -168,7 +163,6 @@ impl FarmProblem {
         }
     }
 
-
     pub fn create_initial_state(&self) -> State {
         State {
             x_values: self.x_values.clone(),
@@ -178,12 +172,9 @@ impl FarmProblem {
             cost: 0, // Assuming initial cost is 0; adjust if needed
         }
     }
-
 }
 
-
 impl Problem for FarmProblem {
-
     type State = State;
     fn get_possible_actions(&self, state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
@@ -215,10 +206,6 @@ impl Problem for FarmProblem {
 
         actions
     }
-
-
-
-
 
     fn apply_action(&self, state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
@@ -258,10 +245,6 @@ impl Problem for FarmProblem {
         new_state
     }
 
-
-
-
-
     fn is_goal_state(&self, state: &State) -> bool {
         // Check if all x_values meet or exceed their respective thresholds
         for (farm, threshold) in &self.goal_thresholds {
@@ -287,7 +270,6 @@ impl Problem for FarmProblem {
         // Check if the total weighted sum meets or exceeds the goal threshold
         total_weighted_sum >= self.weighted_sum_goal.threshold as f64
     }
-
 
     fn heuristic(&self, state: &State) -> f64 {
         // heuristic is imported during build time from include!("refined_heuristic.in")
