@@ -1,0 +1,44 @@
+{
+    "tap": {
+        "name": "tap1",
+        "x": 3,
+        "y": 7,
+        "water_amount": 29
+    },
+    "robots": {
+        "agent1": {
+            "index": 1,
+            "x": 3,
+            "y": 6,
+            "max_carry": 5,
+            "carry": 0
+        },
+        "agent2": {
+            "index": 2,
+            "x": 8,
+            "y": 6,
+            "max_carry": 5,
+            "carry": 0
+        }
+    },
+    "plants": {
+        "plant1": {
+            "index": 1,
+            "x": 5,
+            "y": 7,
+            "poured": 0
+        }
+    },
+    "max_x": 10,
+    "max_y": 10,
+    "min_x": 1,
+    "min_y": 1,
+    "goal": {
+        "plant_goals": {
+            "plant1": 4
+        },
+        "other_goals": [
+            "(= (total_poured) (total_loaded)"
+        ]
+    }
+}
