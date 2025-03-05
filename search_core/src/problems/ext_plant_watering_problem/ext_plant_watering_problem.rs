@@ -1,7 +1,7 @@
 use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
-use serde_json::{ Value as JsonValue};
+use serde_json::Value as JsonValue;
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -44,7 +44,6 @@ pub struct Goal {
     conditions: Vec<Condition>,
     total_operator: String,
 }
-
 
 impl Goal {
     pub fn is_goal_state(&self, state: &State) -> bool {
@@ -221,8 +220,7 @@ impl ExtPlantWateringProblem {
             }
 
             //Condition to load water
-            if robot.y == state.tap.y && robot.x == state.tap.x
-            {
+            if robot.y == state.tap.y && robot.x == state.tap.x {
                 actions.push(Self::get_robot_load_water_action(robot));
             }
 
@@ -448,7 +446,7 @@ impl Problem for ExtPlantWateringProblem {
     }
 
     fn load_state_from_json(json_path: &str) -> (State, ExtPlantWateringProblem) {
-              // Read the JSON file into a string.
+        // Read the JSON file into a string.
         let json_str = fs::read_to_string(json_path).expect("Failed to read JSON file");
 
         // Parse the JSON string into a serde_json::Value.
@@ -468,9 +466,9 @@ impl Problem for ExtPlantWateringProblem {
         let problem: ExtPlantWateringProblem =
             serde_json::from_value(problem_value.clone()).expect("Failed to deserialize problem");
 
-            println!("{:?}", state);
-            println!("{:?}", problem);
-            
+        println!("{:?}", state);
+        println!("{:?}", problem);
+
         (state, problem)
     }
 }

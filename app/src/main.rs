@@ -6,7 +6,7 @@
 // use search_core::problems::farm_problem::farm_problem::FarmProblem;
 // use search_core::problems::fo_counters_expression_problem::fo_counters_expression_problem::FoCountersExpressionProblem;
 // use search_core::problems::fo_counters_problem::fo_counters_problem::FoCountersProblem;
- use search_core::problems::fo_sailing_problem::fo_sailing_problem::FooSailingProblem;
+use search_core::problems::fo_sailing_problem::fo_sailing_problem::FooSailingProblem;
 // use search_core::problems::market_trader_problem::market_trader_problem::MarketTraderProblem;
 // use search_core::problems::path_ways_metric_problem::path_ways_metric_problem::PathWaysMetricProblem;
 // use search_core::problems::red_car_problem::red_car_problem::RedCarProblem;
