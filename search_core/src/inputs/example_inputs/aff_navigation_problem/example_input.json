@@ -1,0 +1,76 @@
+{
+  "map size": {
+    "x": 50,
+    "y": 30
+  },
+  "drones": {
+    "drone1": {
+      "id": "drone1",
+      "x": 10,
+      "y": 15,
+      "z": "Medium",
+      "theta": 1.57,
+      "velocity": 2.5,
+      "fuel": 800.0
+    },
+    "drone2": {
+      "id": "drone2",
+      "x": 5,
+      "y": 10,
+      "z": "Low",
+      "theta": 0.0,
+      "velocity": 1.5,
+      "fuel": 600.0
+    }
+  },
+  "fires": {
+    "fire1": {
+      "x": 20,
+      "y": 25,
+      "radius": 3.5,
+      "intensity": 0.9
+    },
+    "fire2": {
+      "x": 30,
+      "y": 35,
+      "radius": 4.0,
+      "intensity": 0.7
+    }
+  },
+  "people": [
+    {
+      "x": 12,
+      "y": 18,
+      "count": 4
+    },
+    {
+      "x": 15,
+      "y": 20,
+      "count": 2
+    }
+  ],
+  "dtm": {
+    "0,0": 1,
+    "10,15": 2,
+    "20,25": 4
+  },
+  "obstacles": {
+    "obs1": {
+      "boundaries": [
+        [3, 3],
+        [3, 7],
+        [7, 7],
+        [7, 3]
+      ]
+    },
+    "obs2": {
+      "boundaries": [
+        [10, 10],
+        [10, 15],
+        [15, 15],
+        [15, 10]
+      ]
+    }
+  }
+}
+
