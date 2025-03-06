@@ -17,7 +17,7 @@ use time::Instant;
 fn main() {
     let start_time = Instant::now();
     solve_problem::<RedCarProblem>(
-        "search_core/src/inputs/example_inputs/red_car_problem/problems_json/pfile3.json",
+        "search_core/src/inputs/example_inputs/red_car_problem/problems_json/pfile1.json",
         "A*",
     );
 
