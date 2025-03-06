@@ -129,7 +129,7 @@ impl BlockGroupingProblem {
             Some(Value::Int(index)) => *index,
             _ => panic!("Action parameters do not contain a valid index for block."),
         };
-        if let Some(block) = (new_state.blocks.iter_mut().find(|b| b.index == block_index)) {
+        if let Some(block) = new_state.blocks.iter_mut().find(|b| b.index == block_index) {
             block.x -= 1;
         } else {
             panic!("Block with index {} not found", block_index);

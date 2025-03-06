@@ -2,7 +2,7 @@ use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
-use std::fmt;
+use std::fs;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
@@ -465,9 +465,6 @@ impl Problem for ExtPlantWateringProblem {
             serde_json::from_value(state_value.clone()).expect("Failed to deserialize state");
         let problem: ExtPlantWateringProblem =
             serde_json::from_value(problem_value.clone()).expect("Failed to deserialize problem");
-
-        println!("{:?}", state);
-        println!("{:?}", problem);
 
         (state, problem)
     }

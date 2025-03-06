@@ -333,7 +333,7 @@ impl PathWaysMetricProblem {
                 .iter()
                 .find(|s| s.name == reaction.molecule_1_name);
 
-            if let (Some(mol1)) = mol1_opt {
+            if let Some(mol1) = mol1_opt {
                 // Check preconditions:
                 if mol1.available >= reaction.need_molecule_1 {
                     actions.push(Self::get_self_associate_with_catalyze_action(reaction));
@@ -352,7 +352,7 @@ impl PathWaysMetricProblem {
                 .iter()
                 .find(|s| s.name == reaction.molecule_1_name);
 
-            if let (Some(mol1)) = mol1_opt {
+            if let Some(mol1) = mol1_opt {
                 // Check preconditions:
                 if mol1.available >= reaction.need_molecule_1 {
                     actions.push(Self::get_synthesize_action(reaction));

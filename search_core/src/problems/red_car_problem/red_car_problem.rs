@@ -2,6 +2,7 @@ use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
+use std::collections::HashMap;
 use std::fs;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -13,27 +14,7 @@ pub struct State {
     pub verticaltrucks: Vec<VerticalTruck>,
 }
 
-impl State {
-    pub fn find_vehicle_mut(&mut self, name: &str) -> Option<VehicleMut<'_>> {
-        // Check horizontal cars
-        if let Some(car) = self.horizontalcars.iter_mut().find(|v| v.name == name) {
-            return Some(VehicleMut::HorizontalCar(car));
-        }
-        // Check vertical cars
-        if let Some(car) = self.verticalcars.iter_mut().find(|v| v.name == name) {
-            return Some(VehicleMut::VerticalCar(car));
-        }
-        // Check horizontal trucks
-        if let Some(truck) = self.horizontaltrucks.iter_mut().find(|v| v.name == name) {
-            return Some(VehicleMut::HorizontalTruck(truck));
-        }
-        // Check vertical trucks
-        if let Some(truck) = self.verticaltrucks.iter_mut().find(|v| v.name == name) {
-            return Some(VehicleMut::VerticalTruck(truck));
-        }
-        None
-    }
-}
+impl State {}
 
 impl StateTrait for State {}
 
@@ -176,16 +157,6 @@ pub struct Grid {
     pub col_size: i32, // Size of the grid (n x m)
     pub cells: HashMap<(i32, i32), String>,
 }
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Grid {
-    pub row_size: i32,
-    pub col_size: i32,
-    // Map from (row, col) coordinates to the name of the object occupying that cell.
-    pub cells: HashMap<(i32, i32), String>,
-}
 
 impl Grid {
     /// Creates a new empty grid with the given dimensions.
@@ -215,7 +186,7 @@ impl Grid {
     /// Attempts to place an object on the grid.
     /// The `positions` slice contains the coordinates the object will occupy.
     /// Returns an error if any position is out of bounds or already occupied.
-    pub fn place_object(&mut self, name: &str, positions: &[(i32, i32)]) -> Result<(), String> {
+    pub fn place_object(&mut self, name: String, positions: &[(i32, i32)]) -> Result<(), String> {
         // Validate each position.
         for &(x, y) in positions {
             if x < 0 || x >= self.row_size || y < 0 || y >= self.col_size {
@@ -240,6 +211,7 @@ impl Grid {
 pub struct RedCarProblem {}
 impl RedCarProblem {
     pub fn get_possible_horizontal_cars_actions(state: &State) -> Vec<Action> {
+        let mut actions = Vec::new();
         for car in &state.horizontalcars {
             if car.can_move("right", &state.grid) {
                 let mut parameters = HashMap::new();
@@ -257,14 +229,16 @@ impl RedCarProblem {
                 actions.push(Action::new(action_name, 1, parameters));
             }
         }
+        actions
     }
     pub fn get_possible_vertical_cars_actions(state: &State) -> Vec<Action> {
+        let mut actions = Vec::new();
         for car in &state.verticalcars {
             if car.can_move("up", &state.grid) {
                 let mut parameters = HashMap::new();
                 let action_name = format!("{}_move_{}", car.name, "up");
                 parameters.insert("vehicle".to_string(), Value::Text(car.name.clone()));
-                parameters.insert("up".to_string(), Value::Text("up".to_string()));
+                parameters.insert("move".to_string(), Value::Text("up".to_string()));
                 actions.push(Action::new(action_name, 1, parameters));
             }
             // Check if the vehicle can move left
@@ -276,8 +250,10 @@ impl RedCarProblem {
                 actions.push(Action::new(action_name, 1, parameters));
             }
         }
+        actions
     }
     pub fn get_possible_horizontal_trucks_actions(state: &State) -> Vec<Action> {
+        let mut actions = Vec::new();
         for truck in &state.horizontaltrucks {
             if truck.can_move("right", &state.grid) {
                 let mut parameters = HashMap::new();
@@ -295,8 +271,10 @@ impl RedCarProblem {
                 actions.push(Action::new(action_name, 1, parameters));
             }
         }
+        actions
     }
     pub fn get_possible_vertical_trucks_actions(state: &State) -> Vec<Action> {
+        let mut actions = Vec::new();
         for truck in &state.verticaltrucks {
             if truck.can_move("up", &state.grid) {
                 let mut parameters = HashMap::new();
@@ -314,6 +292,7 @@ impl RedCarProblem {
                 actions.push(Action::new(action_name, 1, parameters));
             }
         }
+        actions
     }
 }
 
@@ -321,12 +300,10 @@ impl Problem for RedCarProblem {
     type State = State;
     fn get_possible_actions(&self, state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
-        actions.extends(get_possible_horizontal_cars_actions(state.horizontalcars));
-        actions.extends(get_possible_vertical_cars_actions(state.verticalcars));
-        actions.extends(get_possible_horizontal_trucks_actions(
-            state.horizontaltrucks,
-        ));
-        actions.extends(get_possible_vertical_trucks_actions(state.verticaltrucks));
+        actions.extend(Self::get_possible_horizontal_cars_actions(state));
+        actions.extend(Self::get_possible_vertical_cars_actions(state));
+        actions.extend(Self::get_possible_horizontal_trucks_actions(state));
+        actions.extend(Self::get_possible_vertical_trucks_actions(state));
         actions
     }
 
@@ -343,15 +320,52 @@ impl Problem for RedCarProblem {
         // Clone the state so we can modify it.
         let mut new_state = state.clone();
 
-        if let Some(vehicle) = new_state.find_vehicle_mut(vehicle_name) {
-            let old_positions = vehicle.get_positions();
-            vehicle.apply_action(move_direction);
-            let new_positions = vehicle.get_positions();
+        if let Some(v) = new_state
+            .horizontalcars
+            .iter_mut()
+            .find(|v| v.name == vehicle_name)
+        {
+            let old_positions = v.get_positions();
+            v.apply_action(move_direction);
+            let new_positions = v.get_positions();
+            new_state
+                .grid
+                .update(old_positions, new_positions, vehicle_name);
+        } else if let Some(v) = new_state
+            .verticalcars
+            .iter_mut()
+            .find(|v| v.name == vehicle_name)
+        {
+            let old_positions = v.get_positions();
+            v.apply_action(move_direction);
+            let new_positions = v.get_positions();
+            new_state
+                .grid
+                .update(old_positions, new_positions, vehicle_name);
+        } else if let Some(v) = new_state
+            .horizontaltrucks
+            .iter_mut()
+            .find(|v| v.name == vehicle_name)
+        {
+            let old_positions = v.get_positions();
+            v.apply_action(move_direction);
+            let new_positions = v.get_positions();
+            new_state
+                .grid
+                .update(old_positions, new_positions, vehicle_name);
+        } else if let Some(v) = new_state
+            .verticaltrucks
+            .iter_mut()
+            .find(|v| v.name == vehicle_name)
+        {
+            let old_positions = v.get_positions();
+            v.apply_action(move_direction);
+            let new_positions = v.get_positions();
             new_state
                 .grid
                 .update(old_positions, new_positions, vehicle_name);
         } else {
-            panic!("Vehicle '{}' not found in state", vehicle_name);
+            panic!(" Missing `vehicle` ");
         }
 
         new_state
@@ -370,23 +384,48 @@ impl Problem for RedCarProblem {
         //heuristic(self, state)
         0.0
     }
-    fn load_state_from_json(json_path: &str) -> (State, PathWaysMetricProblem) {
+    fn load_state_from_json(json_path: &str) -> (State, RedCarProblem) {
         // Read the JSON file into a string.
         let json_str = fs::read_to_string(json_path).expect("Failed to read JSON file");
 
         // Parse the JSON string into a serde_json::Value.
         let json_value: JsonValue = serde_json::from_str(&json_str).expect("Failed to parse JSON");
 
-        // Extract the "state" and "problem" fields.
+        // Extract the "state" field.
         let state_value = json_value
             .get("state")
             .expect("Missing 'state' field in JSON");
 
-
-        // Deserialize each part into the corresponding struct.
-        let state: State =
+        // Deserialize into State.
+        let mut state: State =
             serde_json::from_value(state_value.clone()).expect("Failed to deserialize state");
-      
-        (state, Self {})
+
+        // Now fill the grid.cells with the vehicles.
+        // For each horizontal car:
+        for car in &state.horizontalcars {
+            for pos in car.get_positions() {
+                state.grid.cells.insert(pos, car.name.clone());
+            }
+        }
+        // For vertical cars:
+        for car in &state.verticalcars {
+            for pos in car.get_positions() {
+                state.grid.cells.insert(pos, car.name.clone());
+            }
+        }
+        // For horizontal trucks:
+        for truck in &state.horizontaltrucks {
+            for pos in truck.get_positions() {
+                state.grid.cells.insert(pos, truck.name.clone());
+            }
+        }
+        // For vertical trucks:
+        for truck in &state.verticaltrucks {
+            for pos in truck.get_positions() {
+                state.grid.cells.insert(pos, truck.name.clone());
+            }
+        }
+
+        (state, RedCarProblem {})
     }
 }
