@@ -1,12 +1,11 @@
 use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use serde_json::from_reader;
 use serde_json::Value as JsonValue;
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
-
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Boat {
@@ -28,8 +27,7 @@ pub struct State {
     pub persons: Vec<Person>,
 }
 
-impl StateTrait for State {} 
-
+impl StateTrait for State {}
 
 impl PartialEq for State {
     fn eq(&self, other: &Self) -> bool {
@@ -85,14 +83,19 @@ impl SailingProblem {
     }
 
     pub fn save_person_action(boat: &Boat, person: &Person) -> Option<Action> {
-        if boat.x + boat.y >= person.d && 
-           boat.y - boat.x >= person.d && 
-           boat.x + boat.y <= person.d + 25.0 && 
-           boat.y - boat.x <= person.d + 25.0 {
+        if boat.x + boat.y >= person.d
+            && boat.y - boat.x >= person.d
+            && boat.x + boat.y <= person.d + 25.0
+            && boat.y - boat.x <= person.d + 25.0
+        {
             let mut parameters = HashMap::new();
             parameters.insert("boat".to_string(), Value::Int(boat.index));
             parameters.insert("person".to_string(), Value::Int(person.index));
-            Some(Action::new(format!("save_person_{}_{}", boat.index, person.index), 1, parameters))
+            Some(Action::new(
+                format!("save_person_{}_{}", boat.index, person.index),
+                1,
+                parameters,
+            ))
         } else {
             None
         }
@@ -111,7 +114,6 @@ impl SailingProblem {
         new_state
     }
 
-
     fn apply_go_north_west(state: &State, action: &Action) -> State {
         let boat_index = match action.parameters.get("boat").unwrap() {
             Value::Int(index) => *index,
@@ -124,7 +126,6 @@ impl SailingProblem {
         }
         new_state
     }
-
 
     fn apply_go_east(state: &State, action: &Action) -> State {
         let boat_index = match action.parameters.get("boat").unwrap() {
@@ -163,7 +164,6 @@ impl SailingProblem {
         new_state
     }
 
-
     fn apply_go_south_east(state: &State, action: &Action) -> State {
         let boat_index = match action.parameters.get("boat").unwrap() {
             Value::Int(index) => *index,
@@ -178,16 +178,16 @@ impl SailingProblem {
     }
 
     fn apply_go_south(state: &State, action: &Action) -> State {
-    let boat_index = match action.parameters.get("boat").unwrap() {
-        Value::Int(index) => *index,
-        _ => panic!("Expected boat index to be an integer"),
-    };
-    let mut new_state = state.clone();
-    if let Some(boat) = new_state.boats.iter_mut().find(|b| b.index == boat_index) {
-        boat.y -= 2.0;
+        let boat_index = match action.parameters.get("boat").unwrap() {
+            Value::Int(index) => *index,
+            _ => panic!("Expected boat index to be an integer"),
+        };
+        let mut new_state = state.clone();
+        if let Some(boat) = new_state.boats.iter_mut().find(|b| b.index == boat_index) {
+            boat.y -= 2.0;
+        }
+        new_state
     }
-    new_state
-}
 
     fn apply_save_person(state: &State, action: &Action) -> State {
         let boat_index = match action.parameters.get("boat").unwrap() {
@@ -199,20 +199,23 @@ impl SailingProblem {
             _ => panic!("Expected person index to be an integer"),
         };
         let mut new_state = state.clone();
-        if let Some(person) = new_state.persons.iter_mut().find(|p| p.index == person_index) {
+        if let Some(person) = new_state
+            .persons
+            .iter_mut()
+            .find(|p| p.index == person_index)
+        {
             person.saved = true;
         }
         new_state
     }
-   }
-
+}
 
 impl Problem for SailingProblem {
     type State = State;
 
     fn get_possible_actions(&self, state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
-        
+
         for boat in &state.boats {
             actions.push(Self::go_north_east_action(boat));
             actions.push(Self::go_north_west_action(boat));
@@ -221,7 +224,7 @@ impl Problem for SailingProblem {
             actions.push(Self::go_south_west_action(boat));
             actions.push(Self::go_south_east_action(boat));
             actions.push(Self::go_south_action(boat));
-            
+
             for person in &state.persons {
                 if !person.saved {
                     if let Some(action) = Self::save_person_action(boat, person) {
@@ -255,43 +258,40 @@ impl Problem for SailingProblem {
         }
     }
 
-
-
     fn is_goal_state(&self, state: &State) -> bool {
         state.persons.iter().all(|person| person.saved)
     }
 
     fn load_state_from_json(json_path: &str) -> (State, Self) {
-    let file = File::open(json_path).expect("Failed to open JSON file");
-    let reader = BufReader::new(file);
-    let json_data: JsonValue = from_reader(reader).expect("Failed to parse JSON");
+        let file = File::open(json_path).expect("Failed to open JSON file");
+        let reader = BufReader::new(file);
+        let json_data: JsonValue = from_reader(reader).expect("Failed to parse JSON");
 
-    let boats = json_data["boats"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|boat| Boat {
-            x: boat["x"].as_f64().unwrap(),
-            y: boat["y"].as_f64().unwrap(),
-            index: boat["index"].as_i64().unwrap() as i32,
-        })
-        .collect();
+        let boats = json_data["boats"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|boat| Boat {
+                x: boat["x"].as_f64().unwrap(),
+                y: boat["y"].as_f64().unwrap(),
+                index: boat["index"].as_i64().unwrap() as i32,
+            })
+            .collect();
 
-    let persons = json_data["persons"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|person| Person {
-            d: person["d"].as_f64().unwrap(),
-            saved: person["saved"].as_bool().unwrap(),
-            index: person["index"].as_i64().unwrap() as i32,
-        })
-        .collect();
+        let persons = json_data["persons"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|person| Person {
+                d: person["d"].as_f64().unwrap(),
+                saved: person["saved"].as_bool().unwrap(),
+                index: person["index"].as_i64().unwrap() as i32,
+            })
+            .collect();
 
-    let state = State { boats, persons };
-    (state, SailingProblem {})
-}
-
+        let state = State { boats, persons };
+        (state, SailingProblem {})
+    }
 
     fn heuristic(&self, state: &State) -> f64 {
         // Simple heuristic: count unsaved people

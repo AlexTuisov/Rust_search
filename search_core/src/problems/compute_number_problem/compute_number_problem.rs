@@ -2,8 +2,9 @@ use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
 use serde_json::from_reader;
+
 use serde_json::Value as JsonValue;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
 
@@ -51,7 +52,7 @@ fn create_multiply_action(
     let b = combined_values[index_b];
 
     // Check for overflow
-    if let Some(result) = a.checked_mul(b) {
+    if let Some(_result) = a.checked_mul(b) {
         let name = format!("multiply {} * {} -> buffer[{}]", a, b, buffer_index);
         let mut parameters = HashMap::new();
         parameters.insert("a".to_string(), Value::Int(a));

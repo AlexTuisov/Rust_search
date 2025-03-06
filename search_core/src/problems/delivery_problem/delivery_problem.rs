@@ -10,7 +10,7 @@ use std::io::BufReader;
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Arm {
     pub is_free: bool,
-    pub side: i32,  // 0 for left, 1 for right
+    pub side: i32, // 0 for left, 1 for right
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -26,8 +26,8 @@ pub struct Bot {
 pub struct Item {
     pub location: i32,
     pub weight: i32,
-    pub in_arm: i32,    // -1 if not in arm
-    pub in_tray: i32,   // -1 if not in tray
+    pub in_arm: i32,  // -1 if not in arm
+    pub in_tray: i32, // -1 if not in tray
     pub index: i32,
 }
 
@@ -42,7 +42,7 @@ pub struct State {
 impl StateTrait for State {}
 
 pub struct DeliveryProblem {
-    goal_locations: BTreeMap<i32, i32>,  // item_id -> target_room_id
+    goal_locations: BTreeMap<i32, i32>, // item_id -> target_room_id
 }
 
 impl DeliveryProblem {
@@ -51,7 +51,11 @@ impl DeliveryProblem {
         parameters.insert("bot".to_string(), Value::Int(bot));
         parameters.insert("from".to_string(), Value::Int(from));
         parameters.insert("to".to_string(), Value::Int(to));
-        Action::new(format!("move_bot_{}_from_{}_to_{}", bot, from, to), 3, parameters)
+        Action::new(
+            format!("move_bot_{}_from_{}_to_{}", bot, from, to),
+            3,
+            parameters,
+        )
     }
 
     pub fn possible_pick_action(item: i32, room: i32, arm: i32, bot: i32) -> Action {
@@ -60,7 +64,11 @@ impl DeliveryProblem {
         parameters.insert("room".to_string(), Value::Int(room));
         parameters.insert("arm".to_string(), Value::Int(arm));
         parameters.insert("bot".to_string(), Value::Int(bot));
-        Action::new(format!("pick_item_{}_arm_{}_bot_{}", item, arm, bot), 2, parameters)
+        Action::new(
+            format!("pick_item_{}_arm_{}_bot_{}", item, arm, bot),
+            2,
+            parameters,
+        )
     }
 
     pub fn possible_drop_action(item: i32, room: i32, arm: i32, bot: i32) -> Action {
@@ -69,7 +77,11 @@ impl DeliveryProblem {
         parameters.insert("room".to_string(), Value::Int(room));
         parameters.insert("arm".to_string(), Value::Int(arm));
         parameters.insert("bot".to_string(), Value::Int(bot));
-        Action::new(format!("drop_item_{}_arm_{}_bot_{}", item, arm, bot), 2, parameters)
+        Action::new(
+            format!("drop_item_{}_arm_{}_bot_{}", item, arm, bot),
+            2,
+            parameters,
+        )
     }
 
     pub fn possible_to_tray_action(item: i32, arm: i32, bot: i32) -> Action {
@@ -77,7 +89,11 @@ impl DeliveryProblem {
         parameters.insert("item".to_string(), Value::Int(item));
         parameters.insert("arm".to_string(), Value::Int(arm));
         parameters.insert("bot".to_string(), Value::Int(bot));
-        Action::new(format!("to_tray_item_{}_arm_{}_bot_{}", item, arm, bot), 1, parameters)
+        Action::new(
+            format!("to_tray_item_{}_arm_{}_bot_{}", item, arm, bot),
+            1,
+            parameters,
+        )
     }
 
     pub fn possible_from_tray_action(item: i32, arm: i32, bot: i32) -> Action {
@@ -85,21 +101,30 @@ impl DeliveryProblem {
         parameters.insert("item".to_string(), Value::Int(item));
         parameters.insert("arm".to_string(), Value::Int(arm));
         parameters.insert("bot".to_string(), Value::Int(bot));
-        Action::new(format!("from_tray_item_{}_arm_{}_bot_{}", item, arm, bot), 1, parameters)
+        Action::new(
+            format!("from_tray_item_{}_arm_{}_bot_{}", item, arm, bot),
+            1,
+            parameters,
+        )
     }
 
     pub fn apply_move_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
         let bot_index = match action.parameters.get("bot").unwrap() {
             Value::Int(val) => *val,
-            _ => panic!("Expected integer value for bot")
+            _ => panic!("Expected integer value for bot"),
         };
         let to = match action.parameters.get("to").unwrap() {
             Value::Int(val) => *val,
-            _ => panic!("Expected integer value for destination")
+            _ => panic!("Expected integer value for destination"),
         };
 
-        new_state.bots.iter_mut().find(|bot| bot.index == bot_index).unwrap().location = to;
+        new_state
+            .bots
+            .iter_mut()
+            .find(|bot| bot.index == bot_index)
+            .unwrap()
+            .location = to;
         new_state.cost += 3;
         new_state
     }
@@ -108,20 +133,32 @@ impl DeliveryProblem {
         let mut new_state = state.clone();
         let item_index = match action.parameters.get("item").unwrap() {
             Value::Int(val) => *val,
-            _ => panic!("Expected integer value for item")
+            _ => panic!("Expected integer value for item"),
         };
         let arm_side = match action.parameters.get("arm").unwrap() {
             Value::Int(val) => *val,
-            _ => panic!("Expected integer value for arm")
+            _ => panic!("Expected integer value for arm"),
         };
         let bot_index = match action.parameters.get("bot").unwrap() {
             Value::Int(val) => *val,
-            _ => panic!("Expected integer value for bot")
+            _ => panic!("Expected integer value for bot"),
         };
 
-        let item = new_state.items.iter_mut().find(|item| item.index == item_index).unwrap();
-        let bot = new_state.bots.iter_mut().find(|bot| bot.index == bot_index).unwrap();
-        let arm = bot.arms.iter_mut().find(|arm| arm.side == arm_side).unwrap();
+        let item = new_state
+            .items
+            .iter_mut()
+            .find(|item| item.index == item_index)
+            .unwrap();
+        let bot = new_state
+            .bots
+            .iter_mut()
+            .find(|bot| bot.index == bot_index)
+            .unwrap();
+        let arm = bot
+            .arms
+            .iter_mut()
+            .find(|arm| arm.side == arm_side)
+            .unwrap();
 
         item.in_arm = arm_side;
         arm.is_free = false;
@@ -134,24 +171,36 @@ impl DeliveryProblem {
         let mut new_state = state.clone();
         let item_index = match action.parameters.get("item").unwrap() {
             Value::Int(val) => *val,
-            _ => panic!("Expected integer value for item")
+            _ => panic!("Expected integer value for item"),
         };
         let room = match action.parameters.get("room").unwrap() {
             Value::Int(val) => *val,
-            _ => panic!("Expected integer value for room")
+            _ => panic!("Expected integer value for room"),
         };
         let arm_side = match action.parameters.get("arm").unwrap() {
             Value::Int(val) => *val,
-            _ => panic!("Expected integer value for arm")
+            _ => panic!("Expected integer value for arm"),
         };
         let bot_index = match action.parameters.get("bot").unwrap() {
             Value::Int(val) => *val,
-            _ => panic!("Expected integer value for bot")
+            _ => panic!("Expected integer value for bot"),
         };
 
-        let item = new_state.items.iter_mut().find(|item| item.index == item_index).unwrap();
-        let bot = new_state.bots.iter_mut().find(|bot| bot.index == bot_index).unwrap();
-        let arm = bot.arms.iter_mut().find(|arm| arm.side == arm_side).unwrap();
+        let item = new_state
+            .items
+            .iter_mut()
+            .find(|item| item.index == item_index)
+            .unwrap();
+        let bot = new_state
+            .bots
+            .iter_mut()
+            .find(|bot| bot.index == bot_index)
+            .unwrap();
+        let arm = bot
+            .arms
+            .iter_mut()
+            .find(|arm| arm.side == arm_side)
+            .unwrap();
 
         item.in_arm = -1;
         item.location = room;
@@ -165,20 +214,32 @@ impl DeliveryProblem {
         let mut new_state = state.clone();
         let item_index = match action.parameters.get("item").unwrap() {
             Value::Int(val) => *val,
-            _ => panic!("Expected integer value for item")
+            _ => panic!("Expected integer value for item"),
         };
         let arm_side = match action.parameters.get("arm").unwrap() {
             Value::Int(val) => *val,
-            _ => panic!("Expected integer value for arm")
+            _ => panic!("Expected integer value for arm"),
         };
         let bot_index = match action.parameters.get("bot").unwrap() {
             Value::Int(val) => *val,
-            _ => panic!("Expected integer value for bot")
+            _ => panic!("Expected integer value for bot"),
         };
 
-        let item = new_state.items.iter_mut().find(|item| item.index == item_index).unwrap();
-        let bot = new_state.bots.iter_mut().find(|bot| bot.index == bot_index).unwrap();
-        let arm = bot.arms.iter_mut().find(|arm| arm.side == arm_side).unwrap();
+        let item = new_state
+            .items
+            .iter_mut()
+            .find(|item| item.index == item_index)
+            .unwrap();
+        let bot = new_state
+            .bots
+            .iter_mut()
+            .find(|bot| bot.index == bot_index)
+            .unwrap();
+        let arm = bot
+            .arms
+            .iter_mut()
+            .find(|arm| arm.side == arm_side)
+            .unwrap();
 
         item.in_arm = -1;
         item.in_tray = bot_index;
@@ -191,20 +252,32 @@ impl DeliveryProblem {
         let mut new_state = state.clone();
         let item_index = match action.parameters.get("item").unwrap() {
             Value::Int(val) => *val,
-            _ => panic!("Expected integer value for item")
+            _ => panic!("Expected integer value for item"),
         };
         let arm_side = match action.parameters.get("arm").unwrap() {
             Value::Int(val) => *val,
-            _ => panic!("Expected integer value for arm")
+            _ => panic!("Expected integer value for arm"),
         };
         let bot_index = match action.parameters.get("bot").unwrap() {
             Value::Int(val) => *val,
-            _ => panic!("Expected integer value for bot")
+            _ => panic!("Expected integer value for bot"),
         };
 
-        let item = new_state.items.iter_mut().find(|item| item.index == item_index).unwrap();
-        let bot = new_state.bots.iter_mut().find(|bot| bot.index == bot_index).unwrap();
-        let arm = bot.arms.iter_mut().find(|arm| arm.side == arm_side).unwrap();
+        let item = new_state
+            .items
+            .iter_mut()
+            .find(|item| item.index == item_index)
+            .unwrap();
+        let bot = new_state
+            .bots
+            .iter_mut()
+            .find(|bot| bot.index == bot_index)
+            .unwrap();
+        let arm = bot
+            .arms
+            .iter_mut()
+            .find(|arm| arm.side == arm_side)
+            .unwrap();
 
         item.in_tray = -1;
         item.in_arm = arm_side;
@@ -224,7 +297,11 @@ impl Problem for DeliveryProblem {
         for bot in &state.bots {
             if let Some(connected_rooms) = state.room_connections.get(&bot.location) {
                 for &next_room in connected_rooms {
-                    actions.push(Self::possible_move_action(bot.index, bot.location, next_room));
+                    actions.push(Self::possible_move_action(
+                        bot.index,
+                        bot.location,
+                        next_room,
+                    ));
                 }
             }
         }
@@ -237,7 +314,12 @@ impl Problem for DeliveryProblem {
                         if arm.is_free {
                             let new_load = bot.current_load + item.weight;
                             if new_load <= bot.load_limit {
-                                actions.push(Self::possible_pick_action(item.index, item.location, arm.side, bot.index));
+                                actions.push(Self::possible_pick_action(
+                                    item.index,
+                                    item.location,
+                                    arm.side,
+                                    bot.index,
+                                ));
                             }
                         }
                     }
@@ -249,8 +331,17 @@ impl Problem for DeliveryProblem {
         for bot in &state.bots {
             for arm in &bot.arms {
                 if !arm.is_free {
-                    let item = state.items.iter().find(|item| item.in_arm == arm.side).unwrap();
-                    actions.push(Self::possible_drop_action(item.index, bot.location, arm.side, bot.index));
+                    let item = state
+                        .items
+                        .iter()
+                        .find(|item| item.in_arm == arm.side)
+                        .unwrap();
+                    actions.push(Self::possible_drop_action(
+                        item.index,
+                        bot.location,
+                        arm.side,
+                        bot.index,
+                    ));
                 }
             }
         }
@@ -259,8 +350,14 @@ impl Problem for DeliveryProblem {
         for bot in &state.bots {
             for arm in &bot.arms {
                 if !arm.is_free {
-                    let item = state.items.iter().find(|item| item.in_arm == arm.side).unwrap();
-                    actions.push(Self::possible_to_tray_action(item.index, arm.side, bot.index));
+                    let item = state
+                        .items
+                        .iter()
+                        .find(|item| item.in_arm == arm.side)
+                        .unwrap();
+                    actions.push(Self::possible_to_tray_action(
+                        item.index, arm.side, bot.index,
+                    ));
                 }
             }
         }
@@ -271,7 +368,9 @@ impl Problem for DeliveryProblem {
                 if item.in_tray == bot.index {
                     for arm in &bot.arms {
                         if arm.is_free {
-                            actions.push(Self::possible_from_tray_action(item.index, arm.side, bot.index));
+                            actions.push(Self::possible_from_tray_action(
+                                item.index, arm.side, bot.index,
+                            ));
                         }
                     }
                 }
@@ -343,7 +442,11 @@ impl Problem for DeliveryProblem {
             .map(|(k, v)| {
                 (
                     k.parse::<i32>().unwrap(),
-                    v.as_array().unwrap().iter().map(|x| x.as_i64().unwrap() as i32).collect(),
+                    v.as_array()
+                        .unwrap()
+                        .iter()
+                        .map(|x| x.as_i64().unwrap() as i32)
+                        .collect(),
                 )
             })
             .collect();
@@ -370,11 +473,14 @@ impl Problem for DeliveryProblem {
 
     fn is_goal_state(&self, state: &State) -> bool {
         self.goal_locations.iter().all(|(&item, &target_room)| {
-            state.items.iter().any(|i| i.index == item && i.location == target_room)
+            state
+                .items
+                .iter()
+                .any(|i| i.index == item && i.location == target_room)
         })
     }
 
     fn heuristic(&self, state: &State) -> f64 {
-        0.0  // Can be improved to estimate minimum cost to goal
+        0.0 // Can be improved to estimate minimum cost to goal
     }
 }
