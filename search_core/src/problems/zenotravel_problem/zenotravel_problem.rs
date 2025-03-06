@@ -1,10 +1,12 @@
+use std::collections::HashMap;
 use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use std::fs;
+use ordered_float::OrderedFloat;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
     /// Number of cities in the problem.
     pub num_cities: i32,
@@ -22,14 +24,14 @@ pub struct State {
     pub total_fuel_used: i32,
 
     /// The total time elapsed (this value can be a float).
-    pub total_time: f64,
+    pub total_time: OrderedFloat<f64>,
 }
 
 impl State {}
 
 impl StateTrait for State {}
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Airplane {
     /// Unique identifier for the airplane.
     pub index: i32,
@@ -52,6 +54,7 @@ pub struct Airplane {
     pub onboard: i32,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Person {
     /// -1 if he is on airplane (i.e in a airplane)
     pub loc: i32,
@@ -59,6 +62,7 @@ pub struct Person {
     pub on_airpane: i32,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Goal {
     pub airplanes: Vec<(i32, i32)>,
     pub persons: Vec<(i32, i32)>,
