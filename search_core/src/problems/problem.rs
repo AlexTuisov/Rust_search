@@ -9,5 +9,3 @@ pub trait Problem {
     fn heuristic(&self, state: &Self::State) -> f64;
     fn load_state_from_json(json_path: &str) -> (Self::State, Self);
 }
-
-

@@ -3,9 +3,8 @@ use std::collections::BTreeMap;
 use std::fmt::Debug;
 use std::hash::Hash;
 
-
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
-pub struct Position{
+pub struct Position {
     pub x: i32,
     pub y: i32,
 }
@@ -36,9 +35,5 @@ pub enum Value {
     MapToMapToInt(BTreeMap<String, BTreeMap<String, i32>>),
     MapToMapToString(BTreeMap<String, BTreeMap<String, String>>),
 }
-
-
-
-
 
 pub trait StateTrait: Debug + Clone + Serialize + for<'de> Deserialize<'de> + Eq {}

@@ -1,4 +1,3 @@
-pub mod search;
-pub mod problems;
 pub mod algorithms;
-
+pub mod problems;
+pub mod search;

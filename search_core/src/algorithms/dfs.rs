@@ -6,9 +6,7 @@ pub struct DfsQueue {
 
 impl DfsQueue {
     pub fn new() -> Self {
-        DfsQueue {
-            stack: Vec::new(),
-        }
+        DfsQueue { stack: Vec::new() }
     }
 }
 

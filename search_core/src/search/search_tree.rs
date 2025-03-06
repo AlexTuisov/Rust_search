@@ -67,7 +67,12 @@ impl<S: StateTrait> SearchTree<S> {
         actions
     }
 
-    pub fn expand_node<F, G>(&mut self, node_index: usize, get_possible_actions: F, apply_action: G) -> Vec<usize>
+    pub fn expand_node<F, G>(
+        &mut self,
+        node_index: usize,
+        get_possible_actions: F,
+        apply_action: G,
+    ) -> Vec<usize>
     where
         F: Fn(&S) -> Vec<Action>,
         G: Fn(&S, &Action) -> S,
@@ -103,7 +108,3 @@ impl<S: StateTrait> SearchTree<S> {
         }
     }
 }
-
-
-
-
