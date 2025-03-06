@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use std::fmt::Debug;
 use std::hash::Hash;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Copy,Serialize,Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Copy, Serialize, Deserialize)]
 pub struct Position {
     pub x: i32,
     pub y: i32,

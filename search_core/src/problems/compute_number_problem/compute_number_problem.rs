@@ -1,16 +1,19 @@
-use crate::search::{state::StateTrait, state::Value, action::Action};
-use serde_json::from_reader;
+use crate::problems::problem::Problem;
+use crate::search::{action::Action, state::StateTrait, state::Value};
+use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
-use serde::{Deserialize, Serialize};
-use crate::problems::problem::Problem;
 
 include!("refined_heuristic.in");
 
-
-fn create_add_action(index_a: usize, index_b: usize, buffer_index: usize, combined_values: &[i32]) -> Action {
+fn create_add_action(
+    index_a: usize,
+    index_b: usize,
+    buffer_index: usize,
+    combined_values: &[i32],
+) -> Action {
     let a = combined_values[index_a];
     let b = combined_values[index_b];
     let name = format!("add {} + {} -> buffer[{}]", a, b, buffer_index);
@@ -21,7 +24,12 @@ fn create_add_action(index_a: usize, index_b: usize, buffer_index: usize, combin
     Action::new(name, 1, parameters)
 }
 
-fn create_subtract_action(index_a: usize, index_b: usize, buffer_index: usize, combined_values: &[i32]) -> Action {
+fn create_subtract_action(
+    index_a: usize,
+    index_b: usize,
+    buffer_index: usize,
+    combined_values: &[i32],
+) -> Action {
     let a = combined_values[index_a];
     let b = combined_values[index_b];
     let name = format!("subtract {} - {} -> buffer[{}]", a, b, buffer_index);
@@ -32,12 +40,17 @@ fn create_subtract_action(index_a: usize, index_b: usize, buffer_index: usize, c
     Action::new(name, 1, parameters)
 }
 
-fn create_multiply_action(index_a: usize, index_b: usize, buffer_index: usize, combined_values: &[i32]) -> Option<Action> {
+fn create_multiply_action(
+    index_a: usize,
+    index_b: usize,
+    buffer_index: usize,
+    combined_values: &[i32],
+) -> Option<Action> {
     let a = combined_values[index_a];
     let b = combined_values[index_b];
 
     // Check for overflow
-    if let Some(result) = a.checked_mul(b) {
+    if let Some(_result) = a.checked_mul(b) {
         let name = format!("multiply {} * {} -> buffer[{}]", a, b, buffer_index);
         let mut parameters = HashMap::new();
         parameters.insert("a".to_string(), Value::Int(a));
@@ -49,7 +62,12 @@ fn create_multiply_action(index_a: usize, index_b: usize, buffer_index: usize, c
     }
 }
 
-fn create_divide_action(index_a: usize, index_b: usize, buffer_index: usize, combined_values: &[i32]) -> Option<Action> {
+fn create_divide_action(
+    index_a: usize,
+    index_b: usize,
+    buffer_index: usize,
+    combined_values: &[i32],
+) -> Option<Action> {
     let a = combined_values[index_a];
     let b = combined_values[index_b];
     if b == 0 {
@@ -64,9 +82,6 @@ fn create_divide_action(index_a: usize, index_b: usize, buffer_index: usize, com
 
     Some(Action::new(name, 1, parameters))
 }
-
-
-
 
 fn is_prime(n: i32) -> bool {
     if n <= 1 {
@@ -96,9 +111,9 @@ fn is_twin_prime(n: i32) -> bool {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
-    pub initial_set: Vec<i32>,    // A fixed initial set of integers
-    pub buffers: Vec<i32>,        // A vector of buffers for intermediate results
-    pub goal_threshold: i32,      // The threshold value for the goal
+    pub initial_set: Vec<i32>, // A fixed initial set of integers
+    pub buffers: Vec<i32>,     // A vector of buffers for intermediate results
+    pub goal_threshold: i32,   // The threshold value for the goal
 }
 
 impl State {
@@ -111,18 +126,11 @@ impl State {
     }
 }
 
-impl StateTrait for State {
-}
+impl StateTrait for State {}
 
+pub struct ComputeNumberProblem {}
 
-
-
-
-pub struct ComputeNumberProblem {
-}
-
-impl ComputeNumberProblem {
-}
+impl ComputeNumberProblem {}
 
 impl Problem for ComputeNumberProblem {
     type State = State;
@@ -159,7 +167,6 @@ impl Problem for ComputeNumberProblem {
         (state, Self {})
     }
 
-
     fn get_possible_actions(&self, state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
 
@@ -181,10 +188,14 @@ impl Problem for ComputeNumberProblem {
                     // Generate all possible actions
                     actions.push(create_add_action(i, j, buffer_index, &combined_values));
                     actions.push(create_subtract_action(i, j, buffer_index, &combined_values));
-                    if let Some(multiply_action) = create_multiply_action(i, j, buffer_index, &combined_values) {
+                    if let Some(multiply_action) =
+                        create_multiply_action(i, j, buffer_index, &combined_values)
+                    {
                         actions.push(multiply_action);
                     }
-                    if let Some(divide_action) = create_divide_action(i, j, buffer_index, &combined_values) {
+                    if let Some(divide_action) =
+                        create_divide_action(i, j, buffer_index, &combined_values)
+                    {
                         actions.push(divide_action);
                     }
                 }
@@ -193,7 +204,6 @@ impl Problem for ComputeNumberProblem {
 
         actions
     }
-
 
     fn apply_action(&self, state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
@@ -230,22 +240,20 @@ impl Problem for ComputeNumberProblem {
             None => panic!("Action name is empty"),
         };
 
-
         new_state.buffers[buffer_index] = result;
 
         new_state
     }
 
-
     fn is_goal_state(&self, state: &State) -> bool {
-        state.buffers.iter().any(|&value| value > state.goal_threshold && is_twin_prime(value))
+        state
+            .buffers
+            .iter()
+            .any(|&value| value > state.goal_threshold && is_twin_prime(value))
     }
-
 
     fn heuristic(&self, state: &State) -> f64 {
         // heuristic is imported during build time from include!("refined_heuristic.in")
         heuristic(self, state)
     }
-
-
 }

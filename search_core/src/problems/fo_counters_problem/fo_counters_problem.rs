@@ -1,12 +1,8 @@
 use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
-use serde_json::{from_reader, Value as JsonValue};
-use std::collections::HashMap;
-use std::error::Error;
+use serde_json::Value as JsonValue;
 use std::fs;
-use std::fs::File;
-use std::io::BufReader;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
@@ -279,114 +275,26 @@ impl Problem for FoCountersProblem {
         0.0
     }
 
-    fn load_state_from_json(json_path: &str) -> (State, Self) {
+    fn load_state_from_json(json_path: &str) -> (State, FoCountersProblem) {
+        // Read the JSON file into a string.
         let json_str = fs::read_to_string(json_path).expect("Failed to read JSON file");
 
-        let json_value: serde_json::Value =
-            serde_json::from_str(&json_str).expect("Failed to parse JSON");
+        // Parse the JSON string into a serde_json::Value.
+        let json_value: JsonValue = serde_json::from_str(&json_str).expect("Failed to parse JSON");
 
-        // Parse the "Counters" object.
-        let counters_map = json_value.get("Counters").expect("Counters key missing");
-        let mut counters = Vec::new();
-        if let Some(obj) = counters_map.as_object() {
-            for (key, value) in obj.iter() {
-                // If the counter is stored as an integer, use that as its value.
-                // Otherwise, expect an object with fields "value" and optionally "rate_value".
-                let counter_value;
-                let rate_value;
-                if let Some(val) = value.as_i64() {
-                    counter_value = val as i32;
-                    rate_value = 0;
-                } else if let Some(obj_val) = value.as_object() {
-                    counter_value = obj_val
-                        .get("value")
-                        .and_then(|v| v.as_i64())
-                        .expect("Missing 'value' field in counter")
-                        as i32;
-                    rate_value = obj_val
-                        .get("rate_value")
-                        .and_then(|v| v.as_i64())
-                        .unwrap_or(0) as i32;
-                } else {
-                    panic!("Counter {} is not in the expected format", key);
-                }
-                // Here we name the counter as "c{key}".
-                let mut counter = Counter::new(format!("c{}", key), rate_value, counter_value);
+        // Extract the "state" and "problem" fields.
+        let state_value = json_value
+            .get("state")
+            .expect("Missing 'state' field in JSON");
+        let problem_value = json_value
+            .get("problem")
+            .expect("Missing 'problem' field in JSON");
 
-                counters.push(counter);
-            }
-        }
-
-        let state = State {
-            counters,
-            total_cost: 0,
-        };
-
-        // Parse the "Goal" section.
-        let goal_map = json_value.get("Goal").expect("Goal key missing");
-        let mut conditions = Vec::new();
-        if let Some(obj) = goal_map.as_object() {
-            for (key, value) in obj.iter() {
-                let cond_str = value
-                    .as_str()
-                    .expect("Expected goal condition to be a string");
-
-                // Remove all parentheses to get a cleaner format.
-                let cond_clean = cond_str
-                    .replace("(", "")
-                    .replace(")", "")
-                    .trim()
-                    .to_string();
-                let parts: Vec<&str> = cond_clean.split_whitespace().collect();
-                if parts.len() != 3 {
-                    panic!(
-                        "Invalid condition format (expected 3 tokens): {}",
-                        cond_clean
-                    );
-                }
-                let left_expr_str = parts[0]; // e.g., "c0+1"
-                let operator = parts[1]; // e.g., "<=" or ">="
-                let right_expr_str = parts[2]; // e.g., "c1"
-
-                // Parse the left-hand side: split on '+'.
-                let left_parts: Vec<&str> = left_expr_str.split('+').collect();
-                if left_parts.len() != 2 {
-                    panic!("Invalid left expression format: {}", left_expr_str);
-                }
-                let left_counter = left_parts[0].to_string(); // e.g., "c0"
-                let left_offset = left_parts[1]
-                    .parse::<i32>()
-                    .expect("Invalid offset in left expression");
-
-                let left_expr = LinearExpr {
-                    terms: vec![(1, left_counter)],
-                    constant: left_offset,
-                };
-
-                let right_expr = LinearExpr {
-                    terms: vec![(1, right_expr_str.to_string())],
-                    constant: 0,
-                };
-
-                let condition = Condition {
-                    left: left_expr,
-                    operator: operator.to_string(),
-                    right: right_expr,
-                };
-
-                conditions.push(condition);
-            }
-        }
-        let goal = Goal { conditions };
-
-        // Parse max_value if present, default to 48 otherwise.
-        let max_value = json_value
-            .get("max_value")
-            .and_then(|v| v.as_i64())
-            .map(|v| v as i32)
-            .unwrap_or(48);
-
-        let problem = FoCountersProblem { max_value, goal };
+        // Deserialize each part into the corresponding struct.
+        let state: State =
+            serde_json::from_value(state_value.clone()).expect("Failed to deserialize state");
+        let problem: FoCountersProblem =
+            serde_json::from_value(problem_value.clone()).expect("Failed to deserialize problem");
 
         (state, problem)
     }

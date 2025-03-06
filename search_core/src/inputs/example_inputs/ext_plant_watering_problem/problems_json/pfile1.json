@@ -1,0 +1,53 @@
+{
+    "state": {
+        "robots": [
+            {
+                "index": 1,
+                "x": 3,
+                "y": 8,
+                "max_carry": 10,
+                "carry": 0
+            }
+        ],
+        "plants": [
+            {
+                "index": 1,
+                "x": 5,
+                "y": 7,
+                "poured": 0
+            },
+            {
+                "index": 2,
+                "x": 2,
+                "y": 7,
+                "poured": 0
+            }
+        ],
+        "tap": {
+            "x": 3,
+            "y": 8,
+            "water_amount": 29
+        },
+        "total_poured": 0,
+        "total_loaded": 0
+    },
+    "problem": {
+        "goal": {
+            "conditions": [
+                {
+                    "plant_index": 1,
+                    "poured_amount": 2
+                },
+                {
+                    "plant_index": 2,
+                    "poured_amount": 2
+                }
+            ],
+            "total_operator": "="
+        },
+        "max_x": 10,
+        "max_y": 10,
+        "min_x": 1,
+        "min_y": 1
+    }
+}

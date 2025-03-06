@@ -134,38 +134,38 @@ impl Problem for DroneProblem {
 
     fn get_possible_actions(&self, state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
-        
+
         if state.battery_level >= 1 {
-            if state.x <= state.bounds.0.1 - 1 {
+            if state.x <= state.bounds.0 .1 - 1 {
                 actions.push(Self::possible_increase_x_action(state));
             }
-            if state.x >= state.bounds.0.0 + 1 {
+            if state.x >= state.bounds.0 .0 + 1 {
                 actions.push(Self::possible_decrease_x_action(state));
             }
-            if state.y <= state.bounds.1.1 - 1 {
+            if state.y <= state.bounds.1 .1 - 1 {
                 actions.push(Self::possible_increase_y_action(state));
             }
-            if state.y >= state.bounds.1.0 + 1 {
+            if state.y >= state.bounds.1 .0 + 1 {
                 actions.push(Self::possible_decrease_y_action(state));
             }
-            if state.z <= state.bounds.2.1 - 1 {
+            if state.z <= state.bounds.2 .1 - 1 {
                 actions.push(Self::possible_increase_z_action(state));
             }
-            if state.z >= state.bounds.2.0 + 1 {
+            if state.z >= state.bounds.2 .0 + 1 {
                 actions.push(Self::possible_decrease_z_action(state));
             }
-            
+
             for (loc_id, &(loc_x, loc_y, loc_z)) in &state.locations {
                 if state.x == loc_x && state.y == loc_y && state.z == loc_z {
                     actions.push(Self::possible_visit_action(state, *loc_id));
                 }
             }
         }
-        
+
         if state.x == 0 && state.y == 0 && state.z == 0 {
             actions.push(Self::possible_recharge_action(state));
         }
-        
+
         actions
     }
 
@@ -192,8 +192,7 @@ impl Problem for DroneProblem {
     }
 
     fn is_goal_state(&self, state: &State) -> bool {
-        state.visited.values().all(|&v| v) && 
-        state.x == 0 && state.y == 0 && state.z == 0
+        state.visited.values().all(|&v| v) && state.x == 0 && state.y == 0 && state.z == 0
     }
 
     fn load_state_from_json(json_path: &str) -> (State, Self) {
@@ -218,16 +217,29 @@ impl Problem for DroneProblem {
                 .iter()
                 .map(|(k, v)| {
                     let coords = v.as_array().unwrap();
-                    (k.parse::<i32>().unwrap(), 
-                    (coords[0].as_i64().unwrap() as i32,
-                    coords[1].as_i64().unwrap() as i32,
-                    coords[2].as_i64().unwrap() as i32))
+                    (
+                        k.parse::<i32>().unwrap(),
+                        (
+                            coords[0].as_i64().unwrap() as i32,
+                            coords[1].as_i64().unwrap() as i32,
+                            coords[2].as_i64().unwrap() as i32,
+                        ),
+                    )
                 })
                 .collect(),
             bounds: (
-                (json_data["min_x"].as_i64().unwrap() as i32, json_data["max_x"].as_i64().unwrap() as i32),
-                (json_data["min_y"].as_i64().unwrap() as i32, json_data["max_y"].as_i64().unwrap() as i32),
-                (json_data["min_z"].as_i64().unwrap() as i32, json_data["max_z"].as_i64().unwrap() as i32)
+                (
+                    json_data["min_x"].as_i64().unwrap() as i32,
+                    json_data["max_x"].as_i64().unwrap() as i32,
+                ),
+                (
+                    json_data["min_y"].as_i64().unwrap() as i32,
+                    json_data["max_y"].as_i64().unwrap() as i32,
+                ),
+                (
+                    json_data["min_z"].as_i64().unwrap() as i32,
+                    json_data["max_z"].as_i64().unwrap() as i32,
+                ),
             ),
         };
 
@@ -235,23 +247,22 @@ impl Problem for DroneProblem {
         (state, Self { battery_capacity })
     }
 
-
     fn heuristic(&self, state: &State) -> f64 {
         // let mut min_distance = f64::MAX;
-        
+
         // for (loc_id, &(loc_x, loc_y, loc_z)) in &state.locations {
         //     if !state.visited.get(loc_id).unwrap_or(&false) {
-        //         let distance = ((state.x - loc_x).abs() + 
-        //                       (state.y - loc_y).abs() + 
+        //         let distance = ((state.x - loc_x).abs() +
+        //                       (state.y - loc_y).abs() +
         //                       (state.z - loc_z).abs()) as f64;
         //         min_distance = min_distance.min(distance);
         //     }
         // }
-        
+
         // if min_distance == f64::MAX || state.battery_level <= min_distance as i32 {
         //     min_distance = (state.x.abs() + state.y.abs() + state.z.abs()) as f64;
         // }
-        
+
         // min_distance
         0.0
     }

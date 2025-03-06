@@ -1,5 +1,5 @@
-use std::collections::VecDeque;
 use crate::algorithms::priority_queue::PriorityQueue;
+use std::collections::VecDeque;
 
 // A simple FIFO queue for BFS
 pub struct BfsQueue {

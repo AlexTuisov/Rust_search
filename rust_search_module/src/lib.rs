@@ -1,10 +1,8 @@
-use search_core::search::solve::solve_problem;
 use pyo3::prelude::*;
+use search_core::problems::compute_number_problem::compute_number_problem::ComputeNumberProblem;
 use search_core::problems::farm_problem::farm_problem::FarmProblem;
 use search_core::problems::market_trader_problem::market_trader_problem::MarketTraderProblem;
-use search_core::problems::compute_number_problem::compute_number_problem::ComputeNumberProblem;
-
-
+use search_core::search::solve::solve_problem;
 
 #[pyfunction]
 fn solve_problem_py(json_path: &str, search_strategy: &str, problem_type: &str) -> PyResult<()> {

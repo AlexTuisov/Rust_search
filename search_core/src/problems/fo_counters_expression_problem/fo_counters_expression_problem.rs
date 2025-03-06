@@ -1,12 +1,8 @@
 use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
-use serde_json::{from_reader, Value as JsonValue};
-use std::collections::HashMap;
-use std::error::Error;
+use serde_json::Value as JsonValue;
 use std::fs;
-use std::fs::File;
-use std::io::BufReader;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
@@ -340,63 +336,26 @@ impl Problem for FoCountersExpressionProblem {
         0.0
     }
 
-    fn load_state_from_json(json_path: &str) -> (State, Self) {
+    fn load_state_from_json(json_path: &str) -> (State, FoCountersExpressionProblem) {
+        // Read the JSON file into a string.
         let json_str = fs::read_to_string(json_path).expect("Failed to read JSON file");
 
-        let json_value: serde_json::Value =
-            serde_json::from_str(&json_str).expect("Failed to parse JSON");
+        // Parse the JSON string into a serde_json::Value.
+        let json_value: JsonValue = serde_json::from_str(&json_str).expect("Failed to parse JSON");
 
-        // Parse the "Counters" object.
-        let counters_map = json_value.get("Counters").expect("Counters key missing");
-        let mut counters = Vec::new();
-        if let Some(obj) = counters_map.as_object() {
-            for (key, value) in obj.iter() {
-                let counter_value = value.get("value").and_then(|v| v.as_i64()).unwrap_or(0) as i32;
-                let rate_value = value
-                    .get("rate_value")
-                    .and_then(|v| v.as_i64())
-                    .unwrap_or(0) as i32;
-                counters.push(Counter::new(format!("c{}", key), rate_value, counter_value));
-            }
-        }
+        // Extract the "state" and "problem" fields.
+        let state_value = json_value
+            .get("state")
+            .expect("Missing 'state' field in JSON");
+        let problem_value = json_value
+            .get("problem")
+            .expect("Missing 'problem' field in JSON");
 
-        let state = State {
-            counters,
-            total_cost: 0,
-        };
-
-        // Parse the "Goal" section.
-        let goal_map = json_value.get("Goal").expect("Goal key missing");
-        let mut conditions = Vec::new();
-        if let Some(obj) = goal_map.as_object() {
-            for (key, value) in obj.iter() {
-                let cond_str = value
-                    .as_str()
-                    .expect("Expected goal condition to be a string");
-
-                // Parse condition using a recursive parser.
-                let (left_expr, operator, right_expr) = Self::parse_condition(cond_str);
-
-                let condition = Condition {
-                    left: left_expr,
-                    operator,
-                    right: right_expr,
-                };
-
-                conditions.push(condition);
-            }
-        }
-
-        let goal = Goal { conditions };
-
-        // Parse max_value if present, default to 48 otherwise.
-        let max_value = json_value
-            .get("max_value")
-            .and_then(|v| v.as_i64())
-            .map(|v| v as i32)
-            .unwrap_or(48);
-
-        let problem = FoCountersExpressionProblem { max_value, goal };
+        // Deserialize each part into the corresponding struct.
+        let state: State =
+            serde_json::from_value(state_value.clone()).expect("Failed to deserialize state");
+        let problem: FoCountersExpressionProblem =
+            serde_json::from_value(problem_value.clone()).expect("Failed to deserialize problem");
 
         (state, problem)
     }

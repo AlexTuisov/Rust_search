@@ -1,5 +1,0 @@
-{
-  "grid": { "row_size": 6, "col_size": 6 },
-  "cost": 0,
-  "vehicles": [ { "name": "red-car", "kind": "HorizontalCar", "position": [2, 0] } ]
-}
