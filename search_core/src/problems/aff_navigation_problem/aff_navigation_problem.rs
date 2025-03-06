@@ -1,23 +1,22 @@
-use crate::search::{state::StateTrait, state::Value, action::Action};
+use crate::problems::aff_navigation_problem::utils::{has_line_of_sight, ZLevel};
+use crate::problems::problem::Problem;
+use crate::search::{action::Action, state::StateTrait, state::Value};
+use ordered_float::OrderedFloat;
+use serde::{Deserialize, Serialize};
 use serde_json::from_reader;
 use serde_json::Value as JsonValue;
-use std::collections::{HashMap};
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::BufReader;
-use serde::{Deserialize, Serialize};
-use crate::problems::problem::Problem;
-use ordered_float::OrderedFloat;
-use crate::problems::aff_navigation_problem::utils::{ZLevel, has_line_of_sight};
 
 include!("refined_heuristic.in");
-
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
     pub timestamp: i64,
     pub drones: HashMap<String, Drone>, // Drone ID -> Drone object
-    pub fires: Vec<Fire>, //  Fire objects
-    pub people: Vec<PeopleGroup>
+    pub fires: Vec<Fire>,               //  Fire objects
+    pub people: Vec<PeopleGroup>,
 }
 
 impl StateTrait for State {}
@@ -80,14 +79,12 @@ pub struct MapSize {
     pub y: i32,
 }
 
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AFFNavigationProblem {
     pub dtm: HashMap<(i32, i32), OrderedFloat<f64>>, // (x, y) -> minimum flyable z
     pub obstacles: Vec<Obstacle>,
     pub map_size: MapSize,
 }
-
 
 impl Problem for AFFNavigationProblem {
     type State = State;
@@ -115,21 +112,21 @@ impl Problem for AFFNavigationProblem {
         let v: JsonValue = serde_json::from_reader(reader).expect("Error parsing JSON");
 
         // Parse "map size" from the JSON.
-        let map_size: MapSize = serde_json::from_value(v["map size"].clone())
-            .expect("Error parsing map size");
+        let map_size: MapSize =
+            serde_json::from_value(v["map size"].clone()).expect("Error parsing map size");
 
         // Parse drones (stored as a dictionary in the JSON).
-        let drones: HashMap<String, Drone> = serde_json::from_value(v["drones"].clone())
-            .expect("Error parsing drones");
+        let drones: HashMap<String, Drone> =
+            serde_json::from_value(v["drones"].clone()).expect("Error parsing drones");
 
         // Parse fires from the JSON (as a dictionary keyed by id) and collect the values.
-        let fires_map: HashMap<String, Fire> = serde_json::from_value(v["fires"].clone())
-            .expect("Error parsing fires");
+        let fires_map: HashMap<String, Fire> =
+            serde_json::from_value(v["fires"].clone()).expect("Error parsing fires");
         let fires: Vec<Fire> = fires_map.into_values().collect();
 
         // Parse people (stored as an array in the JSON).
-        let people: Vec<PeopleGroup> = serde_json::from_value(v["people"].clone())
-            .expect("Error parsing people");
+        let people: Vec<PeopleGroup> =
+            serde_json::from_value(v["people"].clone()).expect("Error parsing people");
 
         // Build the State (timestamp is always 0).
         let state = State {
@@ -141,8 +138,8 @@ impl Problem for AFFNavigationProblem {
 
         // Parse dtm:
         // The JSON dtm is a dictionary with keys formatted as "x,y" and integer values (0 to 4).
-        let dtm_json_map: HashMap<String, i32> = serde_json::from_value(v["dtm"].clone())
-            .expect("Error parsing dtm");
+        let dtm_json_map: HashMap<String, i32> =
+            serde_json::from_value(v["dtm"].clone()).expect("Error parsing dtm");
 
         // Populate the full dtm for each coordinate in the map.
         let mut dtm: HashMap<(i32, i32), OrderedFloat<f64>> = HashMap::new();
@@ -155,8 +152,8 @@ impl Problem for AFFNavigationProblem {
         }
 
         // Parse obstacles from the JSON (as a dictionary keyed by id) and collect their values.
-        let obstacles_map: HashMap<String, Obstacle> = serde_json::from_value(v["obstacles"].clone())
-            .expect("Error parsing obstacles");
+        let obstacles_map: HashMap<String, Obstacle> =
+            serde_json::from_value(v["obstacles"].clone()).expect("Error parsing obstacles");
         let obstacles: Vec<Obstacle> = obstacles_map.into_values().collect();
 
         let problem = AFFNavigationProblem {

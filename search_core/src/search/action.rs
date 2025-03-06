@@ -10,10 +10,13 @@ pub struct Action {
 
 impl Action {
     pub fn new(name: String, cost: i32, parameters: HashMap<String, Value>) -> Self {
-        Action {name, cost, parameters}
+        Action {
+            name,
+            cost,
+            parameters,
+        }
     }
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -30,8 +33,9 @@ mod tests {
         assert_eq!(action.name, "move");
         assert_eq!(action.cost, 5);
         assert_eq!(action.parameters.get("speed"), Some(&Value::Int(10)));
-        assert_eq!(action.parameters.get("direction"), Some(&Value::Text("north".to_string())));
+        assert_eq!(
+            action.parameters.get("direction"),
+            Some(&Value::Text("north".to_string()))
+        );
     }
 }
-
-

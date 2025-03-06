@@ -1,26 +1,25 @@
-use crate::search::{state::StateTrait, state::Value, action::Action};
+use crate::problems::problem::Problem;
+use crate::search::{action::Action, state::StateTrait, state::Value};
+use serde::{Deserialize, Serialize};
 use serde_json::from_reader;
 use serde_json::Value as JsonValue;
 use std::collections::{BTreeMap, HashMap};
 use std::fs::File;
 use std::io::BufReader;
-use serde::{Deserialize, Serialize};
-use crate::problems::problem::Problem;
 
 include!("refined_heuristic.in");
 
-
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
-    pub bought: BTreeMap<String, i64>, // Item bought count per type
-    pub camels: Vec<String>,           // List of camel identifiers
+    pub bought: BTreeMap<String, i64>,     // Item bought count per type
+    pub camels: Vec<String>,               // List of camel identifiers
     pub drive_cost: BTreeMap<String, i64>, // Drive cost between locations
-    pub goods: Vec<String>,            // List of goods available
+    pub goods: Vec<String>,                // List of goods available
     pub location: BTreeMap<String, String>, // Camel-to-location mapping
-    pub markets: Vec<String>,          // List of markets
+    pub markets: Vec<String>,              // List of markets
     pub on_sale: BTreeMap<String, BTreeMap<String, i64>>, // Goods available for sale in each market
-    pub prices: BTreeMap<String, BTreeMap<String, i64>>,  // Prices of goods in each market
-    pub resources: Resources,          // Encapsulated resource-related fields
+    pub prices: BTreeMap<String, BTreeMap<String, i64>>, // Prices of goods in each market
+    pub resources: Resources,              // Encapsulated resource-related fields
 }
 
 impl State {
@@ -31,20 +30,28 @@ impl State {
 
     pub fn drive_cost(&self, from: &str, to: &str) -> Option<f64> {
         let key = format!("{}_{}", from, to);
-        self.drive_cost.get(&key).map(|cost| *cost as f64 / self.resources.scale_factor as f64)
+        self.drive_cost
+            .get(&key)
+            .map(|cost| *cost as f64 / self.resources.scale_factor as f64)
     }
 
     pub fn is_camel_at(&self, camel: &str, location: &str) -> bool {
-        self.location.get(camel).map_or(false, |camel_location| camel_location == location)
+        self.location
+            .get(camel)
+            .map_or(false, |camel_location| camel_location == location)
     }
 
     pub fn on_sale(&self, item: &str, market: &str) -> Option<i64> {
-        self.on_sale.get(market).and_then(|market_sales| market_sales.get(item).copied())
+        self.on_sale
+            .get(market)
+            .and_then(|market_sales| market_sales.get(item).copied())
     }
 
     pub fn price(&self, goods: &str, market: &str) -> Option<f64> {
         self.prices.get(market).and_then(|market_prices| {
-            market_prices.get(goods).map(|price| *price as f64 / self.resources.scale_factor as f64)
+            market_prices
+                .get(goods)
+                .map(|price| *price as f64 / self.resources.scale_factor as f64)
         })
     }
 
@@ -57,17 +64,15 @@ impl State {
     }
 }
 
-impl StateTrait for State {
-
-}
+impl StateTrait for State {}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Resources {
-    pub capacity: i64,    // Total capacity of the trader
-    pub cash_scaled: i64,        // Available cash (scaled if necessary for decimals)
-    pub fuel_scaled: i64,        // Fuel available (scaled if necessary)
-    pub fuel_used_scaled: i64,   // Fuel already used
-    pub scale_factor: i64
+    pub capacity: i64,         // Total capacity of the trader
+    pub cash_scaled: i64,      // Available cash (scaled if necessary for decimals)
+    pub fuel_scaled: i64,      // Fuel available (scaled if necessary)
+    pub fuel_used_scaled: i64, // Fuel already used
+    pub scale_factor: i64,
 }
 
 impl Resources {
@@ -108,7 +113,6 @@ impl Resources {
     }
 }
 
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct AtomicGoal {
     pub parameter: String,
@@ -122,19 +126,17 @@ pub struct Goal {
 
 impl Goal {
     pub fn new() -> Self {
-        Goal { conditions: Vec::new() }
+        Goal {
+            conditions: Vec::new(),
+        }
     }
 }
-
 
 pub struct MarketTraderProblem {
     pub goal: Goal,
 }
 
-
-
 impl MarketTraderProblem {
-
     pub fn possible_travel_actions(state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
 
@@ -148,7 +150,8 @@ impl MarketTraderProblem {
                 for to in &state.markets {
                     if from != to
                         && state.can_drive(from, to)
-                        && state.resources.get_cash() >= state.drive_cost(from, to).unwrap_or(f64::INFINITY)
+                        && state.resources.get_cash()
+                            >= state.drive_cost(from, to).unwrap_or(f64::INFINITY)
                         && state.is_camel_at(camel, from)
                     {
                         if let Some(cost) = state.drive_cost(from, to) {
@@ -174,7 +177,6 @@ impl MarketTraderProblem {
         actions
     }
 
-
     pub fn possible_buy_actions(state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
 
@@ -193,12 +195,22 @@ impl MarketTraderProblem {
                                 if let Some(on_sale) = state.on_sale(goods, market) {
                                     if on_sale > 0 {
                                         let mut parameters = HashMap::new();
-                                        parameters.insert("camel".to_string(), Value::Text(camel.clone()));
-                                        parameters.insert("goods".to_string(), Value::Text(goods.clone()));
-                                        parameters.insert("market".to_string(), Value::Text(market.clone()));
+                                        parameters.insert(
+                                            "camel".to_string(),
+                                            Value::Text(camel.clone()),
+                                        );
+                                        parameters.insert(
+                                            "goods".to_string(),
+                                            Value::Text(goods.clone()),
+                                        );
+                                        parameters.insert(
+                                            "market".to_string(),
+                                            Value::Text(market.clone()),
+                                        );
 
                                         // Format the action name as "buy_{item}_{market}_{camel}"
-                                        let action_name = format!("buy_{}_{}_{}", goods, market, camel);
+                                        let action_name =
+                                            format!("buy_{}_{}_{}", goods, market, camel);
 
                                         actions.push(Action::new(
                                             action_name,
@@ -216,7 +228,6 @@ impl MarketTraderProblem {
 
         actions
     }
-
 
     pub fn possible_upgrade_actions(state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
@@ -243,7 +254,6 @@ impl MarketTraderProblem {
         actions
     }
 
-
     pub fn possible_sell_actions(state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
 
@@ -256,7 +266,8 @@ impl MarketTraderProblem {
                                 let mut parameters = HashMap::new();
                                 parameters.insert("camel".to_string(), Value::Text(camel.clone()));
                                 parameters.insert("goods".to_string(), Value::Text(item.clone()));
-                                parameters.insert("market".to_string(), Value::Text(market.clone()));
+                                parameters
+                                    .insert("market".to_string(), Value::Text(market.clone()));
 
                                 // Format the action name as "sell_{item}_{market}_{camel}"
                                 let action_name = format!("sell_{}_{}_{}", item, market, camel);
@@ -276,19 +287,22 @@ impl MarketTraderProblem {
         actions
     }
 
-
     //////////////////////////------------------------------------------
 
     pub fn apply_travel_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
 
         // Retrieve parameters from the action
-        if let (Some(Value::Text(from)), Some(Value::Text(to)), Some(Value::Text(camel))) =
-            (action.parameters.get("from"), action.parameters.get("to"), action.parameters.get("camel"))
-        {
+        if let (Some(Value::Text(from)), Some(Value::Text(to)), Some(Value::Text(camel))) = (
+            action.parameters.get("from"),
+            action.parameters.get("to"),
+            action.parameters.get("camel"),
+        ) {
             // Update cash by decreasing it by the drive cost
             if let Some(drive_cost) = state.drive_cost(from, to) {
-                new_state.resources.set_cash(new_state.resources.get_cash()-drive_cost);
+                new_state
+                    .resources
+                    .set_cash(new_state.resources.get_cash() - drive_cost);
             }
 
             // Update the camel's location
@@ -300,14 +314,15 @@ impl MarketTraderProblem {
         new_state
     }
 
-
     pub fn apply_buy_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
 
         // Retrieve parameters from the action
-        if let (Some(Value::Text(camel)), Some(Value::Text(goods)), Some(Value::Text(market))) =
-            (action.parameters.get("camel"), action.parameters.get("goods"), action.parameters.get("market"))
-        {
+        if let (Some(Value::Text(camel)), Some(Value::Text(goods)), Some(Value::Text(market))) = (
+            action.parameters.get("camel"),
+            action.parameters.get("goods"),
+            action.parameters.get("market"),
+        ) {
             // Decrease capacity by 1
             new_state.resources.capacity -= 1;
 
@@ -316,13 +331,14 @@ impl MarketTraderProblem {
 
             // Decrease cash by the price of the goods at the market
             if let Some(price) = state.price(goods, market) {
-                new_state.resources.set_cash(new_state.resources.get_cash() - price);
+                new_state
+                    .resources
+                    .set_cash(new_state.resources.get_cash() - price);
             }
         }
 
         new_state
     }
-
 
     pub fn apply_upgrade_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
@@ -333,20 +349,23 @@ impl MarketTraderProblem {
             new_state.resources.capacity += 20;
 
             // Decrease cash by 50
-            new_state.resources.set_cash(new_state.resources.get_cash() - 50.0);
+            new_state
+                .resources
+                .set_cash(new_state.resources.get_cash() - 50.0);
         }
 
         new_state
     }
 
-
     pub fn apply_sell_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
 
         // Retrieve parameters from the action
-        if let (Some(Value::Text(_camel)), Some(Value::Text(goods)), Some(Value::Text(market))) =
-            (action.parameters.get("camel"), action.parameters.get("goods"), action.parameters.get("market"))
-        {
+        if let (Some(Value::Text(_camel)), Some(Value::Text(goods)), Some(Value::Text(market))) = (
+            action.parameters.get("camel"),
+            action.parameters.get("goods"),
+            action.parameters.get("market"),
+        ) {
             // Increase capacity by 1
             new_state.resources.capacity += 1;
 
@@ -357,13 +376,14 @@ impl MarketTraderProblem {
 
             // Increase cash by the price of the goods at the market
             if let Some(price) = state.price(goods, market) {
-                new_state.resources.set_cash(new_state.resources.get_cash() + price);
+                new_state
+                    .resources
+                    .set_cash(new_state.resources.get_cash() + price);
             }
         }
 
         new_state
     }
-
 
     //     fn is_condition_met(state_value: &Value, goal_value: &Value) -> bool {
     //         match (state_value, goal_value) {
@@ -398,7 +418,6 @@ impl MarketTraderProblem {
     // }
 }
 
-
 impl Problem for MarketTraderProblem {
     fn get_possible_actions(&self, state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
@@ -426,7 +445,6 @@ impl Problem for MarketTraderProblem {
         }
     }
 
-
     fn is_goal_state(&self, state: &State) -> bool {
         // Retrieve the goal cash threshold from the goal structure
         if let Some(atomic_goal) = self.goal.conditions.iter().find(|g| g.parameter == "cash") {
@@ -449,8 +467,6 @@ impl Problem for MarketTraderProblem {
             false // No cash condition in the goal
         }
     }
-
-
 
     fn load_state_from_json(json_path: &str) -> (State, Self) {
         let file = File::open(json_path).expect("Failed to open JSON file");
@@ -486,7 +502,8 @@ impl Problem for MarketTraderProblem {
             .expect("Missing or invalid 'drive_cost'")
             .iter()
             .map(|(key, value)| {
-                let scaled_cost = (value.as_f64().expect("Invalid drive cost") * 100.0).round() as i64;
+                let scaled_cost =
+                    (value.as_f64().expect("Invalid drive cost") * 100.0).round() as i64;
                 (key.clone(), scaled_cost)
             })
             .collect();
@@ -529,7 +546,8 @@ impl Problem for MarketTraderProblem {
                     .expect("Invalid prices entry")
                     .iter()
                     .map(|(good, price)| {
-                        let scaled_price = (price.as_f64().expect("Invalid price") * 100.0).round() as i64;
+                        let scaled_price =
+                            (price.as_f64().expect("Invalid price") * 100.0).round() as i64;
                         (good.clone(), scaled_price)
                     })
                     .collect();
@@ -554,8 +572,12 @@ impl Problem for MarketTraderProblem {
             Resources::new(
                 resources_obj["cash"].as_f64().expect("Invalid cash"),
                 resources_obj["fuel"].as_f64().expect("Invalid fuel"),
-                resources_obj["fuel_used"].as_f64().expect("Invalid fuel_used"),
-                resources_obj["capacity"].as_i64().expect("Invalid capacity"),
+                resources_obj["fuel_used"]
+                    .as_f64()
+                    .expect("Invalid fuel_used"),
+                resources_obj["capacity"]
+                    .as_i64()
+                    .expect("Invalid capacity"),
                 100, // Assume scale factor is 100
             )
         };
@@ -564,7 +586,9 @@ impl Problem for MarketTraderProblem {
         if let Some(goal_map) = json_data["goal"].as_object() {
             for (param, threshold) in goal_map {
                 let goal_value = match threshold {
-                    JsonValue::Number(n) => Value::Int(n.as_i64().expect("Invalid goal threshold") as i32),
+                    JsonValue::Number(n) => {
+                        Value::Int(n.as_i64().expect("Invalid goal threshold") as i32)
+                    }
                     JsonValue::String(s) => Value::Text(s.clone()),
                     JsonValue::Bool(b) => Value::Bool(*b),
                     _ => panic!("Invalid goal value"),
@@ -590,7 +614,6 @@ impl Problem for MarketTraderProblem {
 
         (state, MarketTraderProblem { goal })
     }
-
 
     fn heuristic(&self, state: &State) -> f64 {
         // heuristic is imported during build time from include!("refined_heuristic.in")

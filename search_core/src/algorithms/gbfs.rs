@@ -1,6 +1,6 @@
-use std::collections::BinaryHeap;
-use std::cmp::Reverse;
 use crate::algorithms::priority_queue::PriorityQueue;
+use std::cmp::Reverse;
+use std::collections::BinaryHeap;
 
 pub struct GBFSQueue {
     heap: BinaryHeap<Reverse<(i32, usize)>>, // (priority, node_index)

@@ -1,6 +1,6 @@
-use std::collections::HashMap;
 use ordered_float::OrderedFloat;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 /// Represents the discrete elevation levels.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -16,10 +16,10 @@ pub enum ZLevel {
 /// Ground = 0.0, Low = 1.0, Medium = 2.0, High = 3.0, MaxAltitude = 4.0.
 pub fn zlevel_to_f64(z: ZLevel) -> f64 {
     match z {
-        ZLevel::Ground      => 0.0,
-        ZLevel::Low         => 1.0,
-        ZLevel::Medium      => 2.0,
-        ZLevel::High        => 3.0,
+        ZLevel::Ground => 0.0,
+        ZLevel::Low => 1.0,
+        ZLevel::Medium => 2.0,
+        ZLevel::High => 3.0,
         ZLevel::MaxAltitude => 4.0,
     }
 }
@@ -88,8 +88,6 @@ pub fn has_line_of_sight_same_zlevel(
     true
 }
 
-
-
 /// Checks line-of-sight between two points that may be at different discrete elevation levels (ZLevel)
 /// without dense sampling. Instead, we use Bresenham’s algorithm to iterate over only the grid cells
 /// that the line passes through and compute the expected elevation at each cell.
@@ -135,7 +133,10 @@ pub fn has_line_of_sight(
         let expected_elev = z1 + overall_slope * d;
 
         // Look up the terrain elevation for the cell; default to 0 if missing.
-        let terrain = dtm.get(&(cell_x, cell_y)).map(|v| v.into_inner()).unwrap_or(0.0);
+        let terrain = dtm
+            .get(&(cell_x, cell_y))
+            .map(|v| v.into_inner())
+            .unwrap_or(0.0);
 
         // If the terrain elevation is higher than the expected elevation at this cell,
         // the line-of-sight is blocked.
@@ -146,4 +147,3 @@ pub fn has_line_of_sight(
 
     true
 }
-

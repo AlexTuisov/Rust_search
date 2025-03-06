@@ -1,8 +1,8 @@
-use crate::algorithms::priority_queue::PriorityQueue;
 use crate::algorithms::astar::AStarQueue;
-use crate::algorithms::gbfs::GBFSQueue;
 use crate::algorithms::bfs::BfsQueue;
 use crate::algorithms::dfs::DfsQueue;
+use crate::algorithms::gbfs::GBFSQueue;
+use crate::algorithms::priority_queue::PriorityQueue;
 
 pub enum SearchQueue {
     AStar(AStarQueue),
