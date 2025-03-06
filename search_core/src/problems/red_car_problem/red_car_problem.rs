@@ -1,4 +1,6 @@
+use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
+use serde::{Deserialize, Serialize};
 use serde_json::{from_reader, Value as JsonValue};
 use std::collections::HashMap;
 use std::error::Error;
@@ -12,15 +14,7 @@ pub struct State {
     pub cost: i32,
 }
 
-impl State {
-    fn new(row_size: usize, col_size: usize) -> Self {
-        State {
-            grid: Grid::new(row_size, col_size),
-            vehicle_state: VehicleState::new(),
-            cost: 0,
-        }
-    }
-}
+impl State {}
 
 impl StateTrait for State {}
 
@@ -49,8 +43,7 @@ impl VehicleState {
     }
 }
 
-//Kind of Vehicles
-#[derive(Clone, Copy, Debug)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum VehicleKind {
     HorizontalCar,
     HorizontalTruck,
@@ -139,23 +132,27 @@ impl Vehicle {
                 "right" => {
                     let end_position = self.position[1] + self.kind.length(); // Rightmost position of the vehicle
                     end_position < grid.col_size
-                        && grid.cells[self.position[0]][end_position].is_none()
+                        && !grid.cells.contains_key(&(self.position[0], end_position))
                 }
                 "left" => {
                     self.position[1] > 0
-                        && grid.cells[self.position[0]][self.position[1] - 1].is_none()
+                        && !grid
+                            .cells
+                            .contains_key(&(self.position[0], self.position[1] - 1))
                 }
                 _ => false, // Invalid direction
             },
             Direction::Vertical => match direction {
                 "up" => {
                     self.position[0] > 0
-                        && grid.cells[self.position[0] - 1][self.position[1]].is_none()
+                        && !grid
+                            .cells
+                            .contains_key(&(self.position[0] - 1, self.position[1]))
                 }
                 "down" => {
-                    let end_position = self.position[0] + self.kind.length(); // Bottommost position of the vehicle
+                    let end_position = self.position[0] + self.kind.length();
                     end_position < grid.row_size
-                        && grid.cells[end_position][self.position[1]].is_none()
+                        && !grid.cells.contains_key(&(end_position, self.position[1]))
                 }
                 _ => false, // Invalid direction
             },
@@ -247,7 +244,7 @@ impl Grid {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct RedCarProblem {}
 impl RedCarProblem {
-    pub fn generate_moves(state: &State) -> Vec<(Action)> {
+    pub fn generate_moves(state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
 
         for object in &state.vehicle_state.vehicles {
@@ -256,34 +253,18 @@ impl RedCarProblem {
                     // Check if the vehicle can move up
                     if object.can_move("up", &state.grid) {
                         let mut parameters = HashMap::new();
-                        let action_name; // Format the action name as "Car/Truck_{name}_Move{action}"
-                        match object.kind {
-                            VehicleKind::HorizontalCar => {
-                                action_name = format!("car_{}_move_{}", object.name, "up");
-                            }
-                            VehicleKind::HorizontalTruck => {
-                                action_name = format!("truck_{}_move_{}", object.name, "up");
-                            }
-                        }
+                        let action_name = format!("{}_move_{}", object.name, "up");
                         parameters.insert("object".to_string(), Value::Text(object.name.clone()));
-                        parameters.insert("move".to_string(), Value::Text("up"));
+                        parameters.insert("move".to_string(), Value::Text("up".to_string()));
                         actions.push(Action::new(action_name, 1, parameters));
                     }
 
                     // Check if the vehicle can move down
                     if object.can_move("down", &state.grid) {
                         let mut parameters = HashMap::new();
-                        let action_name; // Format the action name as "Car/Truck_{name}_Move{action}"
-                        match object.kind {
-                            VehicleKind::HorizontalCar => {
-                                action_name = format!("car_{}_move_{}", object.name, "down");
-                            }
-                            VehicleKind::HorizontalTruck => {
-                                action_name = format!("truck_{}_move_{}", object.name, "down");
-                            }
-                        }
+                        let action_name = format!("{}_move_{}", object.name, "down");
                         parameters.insert("object".to_string(), Value::Text(object.name.clone()));
-                        parameters.insert("move".to_string(), Value::Text("down"));
+                        parameters.insert("move".to_string(), Value::Text("down".to_string()));
                         actions.push(Action::new(action_name, 1, parameters));
                     }
                 }
@@ -292,33 +273,17 @@ impl RedCarProblem {
                     // Check if the vehicle can move right
                     if object.can_move("right", &state.grid) {
                         let mut parameters = HashMap::new();
-                        let action_name; // Format the action name as "Car/Truck_{name}_Move{action}"
-                        match object.kind {
-                            VehicleKind::HorizontalCar => {
-                                action_name = format!("car_{}_move_{}", object.name, "right");
-                            }
-                            VehicleKind::HorizontalTruck => {
-                                action_name = format!("truck_{}_move_{}", object.name, "right");
-                            }
-                        }
+                        let action_name = format!("{}_move_{}", object.name, "right");
                         parameters.insert("object".to_string(), Value::Text(object.name.clone()));
-                        parameters.insert("move".to_string(), Value::Text("right"));
+                        parameters.insert("move".to_string(), Value::Text("right".to_string()));
                         actions.push(Action::new(action_name, 1, parameters));
                     }
                     // Check if the vehicle can move left
                     if object.can_move("left", &state.grid) {
                         let mut parameters = HashMap::new();
-                        let action_name; // Format the action name as "Car/Truck_{name}_Move{action}"
-                        match object.kind {
-                            VehicleKind::HorizontalCar => {
-                                action_name = format!("car_{}_move_{}", object.name, "left");
-                            }
-                            VehicleKind::HorizontalTruck => {
-                                action_name = format!("truck_{}_move_{}", object.name, "left");
-                            }
-                        }
+                        let action_name = format!("{}_move_{}", object.name, "left"); // Format the action name as "Car/Truck_{name}_Move{action}"
                         parameters.insert("object".to_string(), Value::Text(object.name.clone()));
-                        parameters.insert("move".to_string(), Value::Text("left"));
+                        parameters.insert("move".to_string(), Value::Text("left".to_string()));
                         actions.push(Action::new(action_name, 1, parameters));
                     }
                 }
@@ -369,6 +334,7 @@ impl RedCarProblem {
 }
 
 impl Problem for RedCarProblem {
+    type State = State;
     fn get_possible_actions(&self, state: &State) -> Vec<Action> {
         Self::generate_moves(state)
     }
@@ -384,7 +350,7 @@ impl Problem for RedCarProblem {
 
     fn is_goal_state(&self, state: &State) -> bool {
         for vehicle in &state.vehicle_state.vehicles {
-            if vehicle.name == "red_car" {
+            if vehicle.name == "red-car" {
                 let positions = vehicle.positions();
                 return positions.contains(&[2, state.grid.col_size - 2])
                     && positions.contains(&[2, state.grid.col_size - 1]);
@@ -405,13 +371,9 @@ impl Problem for RedCarProblem {
         // Parse the JSON using from_reader.
         let json_data: JsonValue = from_reader(reader).expect("Failed to parse JSON");
 
-        // We assume the JSON is an object where each key is a problem name.
-        let (problem_name, problem_data) = json_data
-            .as_object()
-            .expect("Expected a JSON object")
-            .iter()
-            .next()
-            .expect("JSON is empty");
+        // Since your JSON file is structured as a direct problem object,
+        // treat json_data as the problem data.
+        let problem_data = json_data.as_object().expect("Expected a JSON object");
 
         // Extract grid dimensions.
         let row_size = problem_data["grid"]["row_size"]
@@ -444,6 +406,11 @@ impl Problem for RedCarProblem {
                     v["position"][0].as_u64().expect("Invalid position") as usize,
                     v["position"][1].as_u64().expect("Invalid position") as usize,
                 ];
+
+                println!(
+                    "Parsed vehicle: name = {}, kind = {}, position = {:?}",
+                    name, kind_str, position
+                );
 
                 let vehicle = Vehicle::new(kind, position, name);
                 vehicle_state.add_vehicle(vehicle.clone());
