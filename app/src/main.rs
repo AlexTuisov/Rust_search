@@ -10,15 +10,16 @@
 // use search_core::problems::market_trader_problem::market_trader_problem::MarketTraderProblem;
 // use search_core::problems::path_ways_metric_problem::path_ways_metric_problem::PathWaysMetricProblem;
 //use search_core::problems::red_car_problem::red_car_problem::RedCarProblem;
-use search_core::problems::zenotravel_problem::zenotravel_problem::ZenoTravelProblem;
+//use search_core::problems::zenotravel_problem::zenotravel_problem::ZenoTravelProblem;
+use search_core::problems::tpp_problem::tpp_problem::TppProblem;
 use search_core::search::solve::solve_problem;
 use std::time;
 use time::Instant;
 
 fn main() {
     let start_time = Instant::now();
-    solve_problem::<ZenoTravelProblem>(
-        "search_core/src/inputs/example_inputs/zenotravel_problem_domain_fix/problems_json/pfile1.json",
+    solve_problem::<TppProblem>(
+        "search_core/src/inputs/example_inputs/tpp_problem/problems_json/pfile1.json",
         "A*",
     );
 
