@@ -118,15 +118,7 @@ pub struct State {
     pub goal_threshold: i32,   // The threshold value for the goal
 }
 
-impl State {
-    fn new() -> Self {
-        State {
-            initial_set: Vec::new(),
-            buffers: Vec::new(),
-            goal_threshold: 0,
-        }
-    }
-}
+impl State {}
 
 impl StateTrait for State {}
 
@@ -210,7 +202,7 @@ impl Problem for ComputeNumberProblem {
     fn apply_action(&self, state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
 
-        let combined_values: Vec<i32> = state
+        let _combined_values: Vec<i32> = state
             .initial_set
             .iter()
             .copied()

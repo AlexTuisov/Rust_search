@@ -247,7 +247,7 @@ impl Problem for DroneProblem {
         (state, Self { battery_capacity })
     }
 
-    fn heuristic(&self, state: &State) -> f64 {
+    fn heuristic(&self, _state: &State) -> f64 {
         // let mut min_distance = f64::MAX;
 
         // for (loc_id, &(loc_x, loc_y, loc_z)) in &state.locations {

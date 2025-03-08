@@ -19,6 +19,7 @@ impl Position {
 pub enum Value {
     Int(i32),
     Int64(i64),
+    OrderedFloat64(ordered_float::OrderedFloat<f64>),
     Text(String),
     Bool(bool),
     Position(Position),

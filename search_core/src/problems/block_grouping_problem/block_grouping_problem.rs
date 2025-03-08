@@ -176,7 +176,7 @@ impl Problem for BlockGroupingProblem {
         true
     }
 
-    fn heuristic(&self, state: &State) -> f64 {
+    fn heuristic(&self, _state: &State) -> f64 {
         // heuristic is imported during build time from include!("refined_heuristic.in")
         //heuristic(self, state)
         0.0

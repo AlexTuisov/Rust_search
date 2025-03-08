@@ -35,7 +35,7 @@ fn heuristic(problem: &MarketTraderProblem, state: &State) -> f64 {
         match atomic_goal.parameter.as_str() {
             "goods" => {
                 if let Value::Int(goal_quantity) = atomic_goal.value {
-                    for (goods, &bought_quantity) in &state.bought {
+                    for (_goods, &bought_quantity) in &state.bought {
                         if bought_quantity < goal_quantity as i64 {
                             heuristic_value += (goal_quantity as i64 - bought_quantity) as f64; // Penalty for each good deficit
                         }

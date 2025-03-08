@@ -480,7 +480,7 @@ impl Problem for DeliveryProblem {
         })
     }
 
-    fn heuristic(&self, state: &State) -> f64 {
+    fn heuristic(&self, _state: &State) -> f64 {
         0.0 // Can be improved to estimate minimum cost to goal
     }
 }
