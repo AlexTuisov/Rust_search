@@ -11,5 +11,6 @@ pub mod market_trader_problem;
 pub mod path_ways_metric_problem;
 pub mod problem;
 pub mod red_car_problem;
+pub mod sugar_problem;
 pub mod tpp_problem;
 pub mod zenotravel_problem;
