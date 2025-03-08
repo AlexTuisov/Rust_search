@@ -15,7 +15,7 @@ impl crate::algorithms::gbfs::GBFSQueue {
 }
 
 impl PriorityQueue for crate::algorithms::gbfs::GBFSQueue {
-    fn insert(&mut self, node_index: usize, cost: i32, heuristic: f64) {
+    fn insert(&mut self, node_index: usize, _cost: i32, heuristic: f64) {
         let priority = heuristic as i32;
         self.heap.push(Reverse((priority, node_index)));
     }

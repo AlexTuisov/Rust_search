@@ -11,7 +11,7 @@ impl DfsQueue {
 }
 
 impl PriorityQueue for DfsQueue {
-    fn insert(&mut self, node_index: usize, cost: i32, heuristic_value: f64) {
+    fn insert(&mut self, node_index: usize, _cost: i32, _heuristic_value: f64) {
         self.stack.push(node_index);
     }
 

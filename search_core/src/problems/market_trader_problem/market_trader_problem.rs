@@ -154,7 +154,7 @@ impl MarketTraderProblem {
                             >= state.drive_cost(from, to).unwrap_or(f64::INFINITY)
                         && state.is_camel_at(camel, from)
                     {
-                        if let Some(cost) = state.drive_cost(from, to) {
+                        if let Some(_cost) = state.drive_cost(from, to) {
                             let mut parameters = HashMap::new();
                             parameters.insert("camel".to_string(), Value::Text(camel.clone()));
                             parameters.insert("from".to_string(), Value::Text(from.clone()));
@@ -318,7 +318,7 @@ impl MarketTraderProblem {
         let mut new_state = state.clone();
 
         // Retrieve parameters from the action
-        if let (Some(Value::Text(camel)), Some(Value::Text(goods)), Some(Value::Text(market))) = (
+        if let (Some(Value::Text(_camel)), Some(Value::Text(goods)), Some(Value::Text(market))) = (
             action.parameters.get("camel"),
             action.parameters.get("goods"),
             action.parameters.get("market"),

@@ -15,7 +15,7 @@ impl BfsQueue {
 }
 
 impl PriorityQueue for BfsQueue {
-    fn insert(&mut self, node_index: usize, cost: i32, heuristic_value: f64) {
+    fn insert(&mut self, node_index: usize, _cost: i32, _heuristic_value: f64) {
         self.queue.push_back(node_index);
     }
 
