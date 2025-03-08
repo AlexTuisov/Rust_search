@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
 use ordered_float::OrderedFloat;
@@ -5,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
 use std::fs;
+use ordered_float::OrderedFloat;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
@@ -53,11 +55,13 @@ pub struct Airplane {
     pub zoom_limit: i32,
     pub onboard: i32,
 }
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MinimizeCondition {
     pub fuel: i32,
     pub time: i32,
 }
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Person {
     /// -1 if he is on airplane
