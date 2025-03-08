@@ -198,7 +198,7 @@ impl Problem for TppProblem {
         let mut actions = Vec::new();
         actions.extend(self.get_drive_actions(state));
         actions.extend(self.get_buy_actions(state));
-        
+
         actions
     }
 
@@ -216,12 +216,10 @@ impl Problem for TppProblem {
     fn is_goal_state(&self, state: &State) -> bool {
         for truck in &state.trucks {
             if truck.location != "-1" {
-               
                 return false;
             }
         }
         for (item_id, bought) in &state.items_bought {
-          
             if self.goal.goal_requests.get(item_id) > Some(bought) {
                 return false;
             }
@@ -271,15 +269,20 @@ impl Problem for TppProblem {
                         .parse::<i32>()
                         .expect("Failed to parse 'to' index");
                     let d = value.as_f64().expect("Distance not a number");
-                    let key = LocationPair { from: from.to_string(), to: to.to_string() };
+                    let key = LocationPair {
+                        from: from.to_string(),
+                        to: to.to_string(),
+                    };
                     distances.insert(key, OrderedFloat(d));
                 }
             }
         }
-        let goal: Goal  =  serde_json::from_value(problem_value.get("goal").expect("Missing goal").clone()).expect("Missing goal");
+        let goal: Goal =
+            serde_json::from_value(problem_value.get("goal").expect("Missing goal").clone())
+                .expect("Missing goal");
 
         let problem = TppProblem { distances, goal };
-    
+
         (state, problem)
     }
 }

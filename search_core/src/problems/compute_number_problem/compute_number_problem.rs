@@ -116,9 +116,7 @@ pub struct State {
     pub goal_threshold: i32,   // The threshold value for the goal
 }
 
-impl State {
- 
-}
+impl State {}
 
 impl StateTrait for State {}
 
