@@ -590,14 +590,12 @@
     ; Action: maintainence-crane
     ; This action represents performing maintenance on a crane to restore its maintenance time.
     ; Preconditions:
-    ;   - The crane ?c is at location ?l.
     ;   - The crane's maintenance time is 0, indicating that maintenance is required.
     ; Effects:
     ;   - Increases the crane's maintenance time by 5 units, effectively resetting its maintenance timer.
     (:action maintainence-crane
-        :parameters (?c - crane ?l - location)
+        :parameters (?c - crane)
         :precondition (and
-            (at-location ?c ?l)
             (= (maintenance-time ?c) 0)
         )
         :effect (and

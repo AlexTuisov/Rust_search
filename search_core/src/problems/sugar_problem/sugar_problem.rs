@@ -27,7 +27,7 @@ pub struct Truck {
     pub id: String,
     pub remaining_capacity: i32,             // Remaining load capacity
     pub raw_cane_load: HashMap<String, i32>, // raw_cane_id -> quantity loaded
-    pub sugar_load: HashMap<String, i32>,    // sugar_id -> quantity loaded
+    pub brand_load: HashMap<String, i32>,    // sugar_id -> quantity loaded
     pub location: i32,
 }
 
@@ -130,62 +130,30 @@ impl SugarProblem {
         mill_id: &String,
         brand_id: &String,
         process_cost: &i32,
-    ) -> Action {
-        let mut parameters = HashMap::new();
-        let action_name = format!("{}_produce_{}_using_single_{}", mill_id, brand_id, cane_id);
-
-        parameters.insert(
-            "produce_sugar_from_single_raw".to_string(),
-            Value::Text("single".to_string()),
-        );
-        parameters.insert("mill".to_string(), Value::Text(mill_id.clone()));
-        parameters.insert("brand".to_string(), Value::Text(brand_id.clone()));
-        parameters.insert("cane".to_string(), Value::Text(cane_id.clone()));
-
-        Action::new(action_name, *process_cost, parameters)
-    }
-
-    pub fn get_produce_sugar_from_single_raw_resource_action(
-        cane_id: &String,
-        mill_id: &String,
-        brand_id: &String,
-        process_cost: &i32,
+        mode: &str, // "single", "resource", or "max"
     ) -> Action {
         let mut parameters = HashMap::new();
         let action_name = format!(
-            "{}_produce_{}_using_resource_{}",
-            mill_id, brand_id, cane_id
+            "{}_produce_{}_using_{}_{}",
+            mill_id, brand_id, mode, cane_id
         );
 
         parameters.insert(
             "produce_sugar_from_single_raw".to_string(),
-            Value::Text("resource".to_string()),
+            Value::Text(mode.to_string()),
         );
         parameters.insert("mill".to_string(), Value::Text(mill_id.clone()));
         parameters.insert("brand".to_string(), Value::Text(brand_id.clone()));
         parameters.insert("cane".to_string(), Value::Text(cane_id.clone()));
 
-        Action::new(action_name, 4 * (*process_cost), parameters)
-    }
+        // Adjust process cost based on mode
+        let adjusted_cost = match mode {
+            "resource" => 4 * (*process_cost),
+            "max" => 5 * (*process_cost),
+            _ => *process_cost, // Default case: "single"
+        };
 
-    pub fn get_produce_sugar_from_single_raw_max_action(
-        cane_id: &String,
-        mill_id: &String,
-        brand_id: &String,
-        process_cost: &i32,
-    ) -> Action {
-        let mut parameters = HashMap::new();
-        let action_name = format!("{}_produce_{}_using_max_{}", mill_id, brand_id, cane_id);
-
-        parameters.insert(
-            "produce_sugar_from_single_raw".to_string(),
-            Value::Text("max".to_string()),
-        );
-        parameters.insert("mill".to_string(), Value::Text(mill_id.clone()));
-        parameters.insert("brand".to_string(), Value::Text(brand_id.clone()));
-        parameters.insert("cane".to_string(), Value::Text(cane_id.clone()));
-
-        Action::new(action_name, 5 * (*process_cost), parameters)
+        Action::new(action_name, adjusted_cost, parameters)
     }
 
     pub fn get_produce_sugar_from_mixed_raw_action(
@@ -194,68 +162,30 @@ impl SugarProblem {
         mill_id: &String,
         brand_id: &String,
         process_cost: &i32,
+        mode: &str, // "single", "resource", or "max"
     ) -> Action {
         let mut parameters = HashMap::new();
         let action_name = format!(
-            "{}_produce_{}_using_single_{}_{}",
-            mill_id, brand_id, cane1_id, cane2_id
+            "{}_produce_{}_using_{}_{}_{}",
+            mill_id, brand_id, mode, cane1_id, cane2_id
         );
 
         parameters.insert(
             "produce_sugar_from_mixed_raw".to_string(),
-            Value::Text("single".to_string()),
+            Value::Text(mode.to_string()),
         );
         parameters.insert("mill".to_string(), Value::Text(mill_id.clone()));
         parameters.insert("brand".to_string(), Value::Text(brand_id.clone()));
         parameters.insert("cane1".to_string(), Value::Text(cane1_id.clone()));
         parameters.insert("cane2".to_string(), Value::Text(cane2_id.clone()));
-        Action::new(action_name, *process_cost, parameters)
-    }
-    pub fn get_produce_sugar_from_mixed_raw_resource_action(
-        cane1_id: &String,
-        cane2_id: &String,
-        mill_id: &String,
-        brand_id: &String,
-        process_cost: &i32,
-    ) -> Action {
-        let mut parameters = HashMap::new();
-        let action_name = format!(
-            "{}_produce_{}_using_resource_{}_{}",
-            mill_id, brand_id, cane1_id, cane2_id
-        );
 
-        parameters.insert(
-            "produce_sugar_from_mixed_raw".to_string(),
-            Value::Text("resource".to_string()),
-        );
-        parameters.insert("mill".to_string(), Value::Text(mill_id.clone()));
-        parameters.insert("brand".to_string(), Value::Text(brand_id.clone()));
-        parameters.insert("cane1".to_string(), Value::Text(cane1_id.clone()));
-        parameters.insert("cane2".to_string(), Value::Text(cane2_id.clone()));
-        Action::new(action_name, *process_cost, parameters)
-    }
-    pub fn get_produce_sugar_from_mixed_raw_max_action(
-        cane1_id: &String,
-        cane2_id: &String,
-        mill_id: &String,
-        brand_id: &String,
-        process_cost: &i32,
-    ) -> Action {
-        let mut parameters = HashMap::new();
-        let action_name = format!(
-            "{}_produce_{}_using_max_{}_{}",
-            mill_id, brand_id, cane1_id, cane2_id
-        );
-
-        parameters.insert(
-            "produce_sugar_from_mixed_raw".to_string(),
-            Value::Text("max".to_string()),
-        );
-        parameters.insert("mill".to_string(), Value::Text(mill_id.clone()));
-        parameters.insert("brand".to_string(), Value::Text(brand_id.clone()));
-        parameters.insert("cane1".to_string(), Value::Text(cane1_id.clone()));
-        parameters.insert("cane2".to_string(), Value::Text(cane2_id.clone()));
-        Action::new(action_name, *process_cost, parameters)
+        // Adjust process cost based on mode
+        let adjusted_cost = match mode {
+            "resource" => 4 * (*process_cost),
+            "max" => 5 * (*process_cost),
+            _ => *process_cost, // Default case: "single"
+        };
+        Action::new(action_name, adjusted_cost, parameters)
     }
 
     pub fn get_setting_machine_action(mill_id: &String) -> Action {
@@ -291,6 +221,7 @@ impl SugarProblem {
                                                         &mill.id,
                                                         brand_id,
                                                         &mill.process_cost,
+                                                        "single",
                                                     ),
                                                 );
 
@@ -298,33 +229,36 @@ impl SugarProblem {
                                                     && *raw_cane2_available > mill.max_produce
                                                 {
                                                     actions.push(
-                                                        Self::get_produce_sugar_from_mixed_raw_max_action(
+                                                        Self::get_produce_sugar_from_mixed_raw_action(
                                                             &formula.raw_cane1.id,
                                                             &raw_cane2.id,
                                                             &mill.id,
                                                             brand_id,
                                                             &mill.process_cost,
+                                                            "max",
                                                         ),
                                                     );
                                                 } else {
                                                     if raw_cane1_available < raw_cane2_available {
                                                         actions.push(
-                                                            Self::get_produce_sugar_from_mixed_raw_resource_action(
+                                                            Self::get_produce_sugar_from_mixed_raw_action(
                                                                 &formula.raw_cane1.id,
                                                                 &raw_cane2.id,
                                                                 &mill.id,
                                                                 brand_id,
                                                                 &mill.process_cost,
+                                                                "resource",
                                                             ),
                                                         );
                                                     } else {
                                                         actions.push(
-                                                            Self::get_produce_sugar_from_mixed_raw_resource_action(
+                                                            Self::get_produce_sugar_from_mixed_raw_action(
                                                                 &formula.raw_cane1.id,
                                                                 &raw_cane2.id,
                                                                 &mill.id,
                                                                 brand_id,
                                                                 &mill.process_cost,
+                                                                "resource"
                                                             ),
                                                         );
                                                     }
@@ -343,24 +277,27 @@ impl SugarProblem {
                                                         &mill.id,
                                                         brand_id,
                                                         &mill.process_cost,
+                                                        "single",
                                                     ),
                                                 );
                                                 if *raw_cane_available > mill.max_produce {
                                                     actions.push(
-                                                        Self::get_produce_sugar_from_single_raw_max_action(
+                                                        Self::get_produce_sugar_from_single_raw_action(
                                                             &formula.raw_cane1.id,
                                                             &mill.id,
                                                             brand_id,
                                                             &mill.process_cost,
+                                                            "max",
                                                         ),
                                                     );
                                                 } else {
                                                     actions.push(
-                                                        Self::get_produce_sugar_from_single_raw_resource_action(
+                                                        Self::get_produce_sugar_from_single_raw_action(
                                                             &formula.raw_cane1.id,
                                                             &mill.id,
                                                             brand_id,
                                                             &mill.process_cost,
+                                                            "resource",
                                                         ),
                                                     );
                                                 }
@@ -424,37 +361,31 @@ impl SugarProblem {
 
     pub fn get_possible_harvest_cane_action(
         farmfield_id: &String,
-        mill_id: &String,
+        destination_id: &String, // Can be a mill or truck
         row_cane_id: &String,
         cane_yield: &i32,
+        destination_type: &str, // "mill" or "truck"
     ) -> Action {
         let mut parameters = HashMap::new();
         let action_name = format!(
-            "harvest_cane_{}_in_{}_to_{}",
-            row_cane_id, farmfield_id, mill_id
+            "harvest_cane_{}_in_{}_to_{}_{}",
+            row_cane_id, farmfield_id, destination_type, destination_id
         );
+
         parameters.insert("farmfield".to_string(), Value::Text(farmfield_id.clone()));
-        parameters.insert("mill".to_string(), Value::Text(mill_id.clone()));
+        parameters.insert(
+            "destination".to_string(),
+            Value::Text(destination_id.clone()),
+        );
         parameters.insert("cane".to_string(), Value::Text(row_cane_id.clone()));
+        parameters.insert(
+            "destination_type".to_string(),
+            Value::Text(destination_type.to_string()),
+        );
+
         Action::new(action_name, *cane_yield, parameters)
     }
 
-    pub fn get_possible_harvest_cane_truck_action(
-        farmfield_id: &String,
-        truck_id: &String,
-        row_cane_id: &String,
-        cane_yield: &i32,
-    ) -> Action {
-        let mut parameters = HashMap::new();
-        let action_name = format!(
-            "harvest_cane_{}_in_{}_to_{}",
-            row_cane_id, farmfield_id, truck_id
-        );
-        parameters.insert("farmfield".to_string(), Value::Text(farmfield_id.clone()));
-        parameters.insert("truck".to_string(), Value::Text(truck_id.clone()));
-        parameters.insert("cane".to_string(), Value::Text(row_cane_id.clone()));
-        Action::new(action_name, *cane_yield, parameters)
-    }
     pub fn get_possible_harvest_cane_actions(state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
         for mill in state.mills.values() {
@@ -469,6 +400,7 @@ impl SugarProblem {
                             &mill.id,
                             raw_cane_id,
                             &farmfield.cane_yield,
+                            "mill",
                         ));
                     }
                 }
@@ -487,6 +419,7 @@ impl SugarProblem {
                                 &truck.id,
                                 raw_cane_id,
                                 &farmfield.cane_yield,
+                                "truck",
                             ));
                         }
                     }
@@ -497,10 +430,11 @@ impl SugarProblem {
         actions
     }
 
-    pub fn get_possible_raw_cane_between_mills_action(
+    pub fn get_possible_raw_cane_transfer_action(
         mill1_id: &String,
         mill2_id: &String,
         row_cane_id: &String,
+        transfer_type: &str, // "transfer" or "aggregate"
     ) -> Action {
         let mut parameters = HashMap::new();
         let action_name = format!(
@@ -509,31 +443,12 @@ impl SugarProblem {
         );
         parameters.insert(
             "between_mills".to_string(),
-            Value::Text("transfer".to_string()),
+            Value::Text(transfer_type.to_string()),
         );
         parameters.insert("mill1".to_string(), Value::Text(mill1_id.clone()));
         parameters.insert("mill2".to_string(), Value::Text(mill2_id.clone()));
         parameters.insert("cane".to_string(), Value::Text(row_cane_id.clone()));
-        Action::new(action_name, 1, parameters)
-    }
 
-    pub fn get_possible_aggregate_raw_cane_between_mills_action(
-        mill1_id: &String,
-        mill2_id: &String,
-        row_cane_id: &String,
-    ) -> Action {
-        let mut parameters = HashMap::new();
-        let action_name = format!(
-            "raw_cane_{}_between_mills_from_{}_to_{}",
-            row_cane_id, mill1_id, mill2_id
-        );
-        parameters.insert(
-            "between_mills".to_string(),
-            Value::Text("aggregate".to_string()),
-        );
-        parameters.insert("mill1".to_string(), Value::Text(mill1_id.clone()));
-        parameters.insert("mill2".to_string(), Value::Text(mill2_id.clone()));
-        parameters.insert("cane".to_string(), Value::Text(row_cane_id.clone()));
         Action::new(action_name, 1, parameters)
     }
 
@@ -550,15 +465,17 @@ impl SugarProblem {
                             .and_then(|mills_map| mills_map.get(&mill2.id))
                             .unwrap_or(&false)
                     {
-                        actions.push(Self::get_possible_raw_cane_between_mills_action(
+                        actions.push(Self::get_possible_raw_cane_transfer_action(
                             &mill1.id,
                             &mill2.id,
                             raw_cane_id,
+                            "transfer",
                         ));
-                        actions.push(Self::get_possible_aggregate_raw_cane_between_mills_action(
+                        actions.push(Self::get_possible_raw_cane_transfer_action(
                             &mill1.id,
                             &mill2.id,
                             raw_cane_id,
+                            "aggregate",
                         ));
                     }
                 }
@@ -568,83 +485,63 @@ impl SugarProblem {
         actions
     }
 
-    pub fn get_possible_load_truck_crane_mill_action(
-        mill_id: &String,
+    pub fn get_possible_load_truck_action(
+        place_id: &String, // Mill or Depot ID
         brand_id: &String,
         truck_id: &String,
-        crane_id: &String,
+        load_method: &str,         // "crane" or "manual"
+        place_type: &str,          // "mill" or "depot"
+        crane_id: Option<&String>, // Some(crane_id) if using crane, None if manual
     ) -> Action {
         let mut parameters = HashMap::new();
-        let action_name = format!(
-            "brand_{}_loaded_with_{}_to_{}_from_{}",
-            brand_id, crane_id, truck_id, mill_id
-        );
-        parameters.insert("load_truck".to_string(), Value::Text("crane".to_string()));
-        parameters.insert("mill".to_string(), Value::Text(mill_id.clone()));
-        parameters.insert("brand".to_string(), Value::Text(brand_id.clone()));
-        parameters.insert("crane".to_string(), Value::Text(crane_id.clone()));
-        parameters.insert("truck".to_string(), Value::Text(truck_id.clone()));
-        Action::new(action_name, 1, parameters)
-    }
-    pub fn get_possible_load_truck_manual_mill_action(
-        mill_id: &String,
-        brand_id: &String,
-        truck_id: &String,
-    ) -> Action {
-        let mut parameters = HashMap::new();
-        let action_name = format!("brand_{}_loaded_to_{}_from_{}", brand_id, truck_id, mill_id);
-        parameters.insert("load_truck".to_string(), Value::Text("manual".to_string()));
-        parameters.insert("mill".to_string(), Value::Text(mill_id.clone()));
-        parameters.insert("brand".to_string(), Value::Text(brand_id.clone()));
-        parameters.insert("truck".to_string(), Value::Text(truck_id.clone()));
-        Action::new(action_name, 1, parameters)
-    }
 
-    pub fn get_possible_load_truck_crane_depot_action(
-        depot_id: &String,
-        brand_id: &String,
-        truck_id: &String,
-        crane_id: &String,
-    ) -> Action {
-        let mut parameters = HashMap::new();
-        let action_name = format!(
-            "brand_{}_loaded_with_{}_to_{}_from_{}",
-            brand_id, crane_id, truck_id, depot_id
+        let action_name = if load_method == "crane" {
+            format!(
+                "brand_{}_loaded_with_{}_to_{}_from_{}_{}",
+                brand_id,
+                crane_id.unwrap(),
+                truck_id,
+                place_type,
+                place_id
+            )
+        } else {
+            format!(
+                "brand_{}_loaded_to_{}_from_{}_{}",
+                brand_id, truck_id, place_type, place_id
+            )
+        };
+
+        parameters.insert(
+            "load_truck".to_string(),
+            Value::Text(load_method.to_string()),
         );
-        parameters.insert("load_truck".to_string(), Value::Text("crane".to_string()));
-        parameters.insert("depot".to_string(), Value::Text(depot_id.clone()));
-        parameters.insert("brand".to_string(), Value::Text(brand_id.clone()));
-        parameters.insert("crane".to_string(), Value::Text(crane_id.clone()));
-        parameters.insert("truck".to_string(), Value::Text(truck_id.clone()));
-        Action::new(action_name, 1, parameters)
-    }
-    pub fn get_possible_load_truck_manual_depot_action(
-        depot_id: &String,
-        brand_id: &String,
-        truck_id: &String,
-    ) -> Action {
-        let mut parameters = HashMap::new();
-        let action_name = format!(
-            "brand_{}_loaded_to_{}_from_{}",
-            brand_id, truck_id, depot_id
-        );
-        parameters.insert("load_truck".to_string(), Value::Text("manual".to_string()));
-        parameters.insert("depot".to_string(), Value::Text(depot_id.clone()));
+        parameters.insert("place".to_string(), Value::Text(place_id.clone()));
         parameters.insert("brand".to_string(), Value::Text(brand_id.clone()));
         parameters.insert("truck".to_string(), Value::Text(truck_id.clone()));
+        parameters.insert(
+            "place_type".to_string(),
+            Value::Text(place_type.to_string()),
+        );
+
+        if let Some(crane) = crane_id {
+            parameters.insert("crane".to_string(), Value::Text(crane.clone()));
+        }
+
         Action::new(action_name, 1, parameters)
     }
 
     pub fn get_possible_load_truck_actions(state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
+
         for truck in state.trucks.values() {
             if truck.remaining_capacity > 0 {
+                // Check mills
                 for mill in state.mills.values() {
                     if truck.location == mill.location {
                         for (brand_id, amount) in mill.brand_storage.iter() {
                             if *amount > 0 {
-                                actions.push(Self::get_possible_load_truck_manual_mill_action(
-                                    &mill.id, brand_id, &truck.id,
+                                actions.push(Self::get_possible_load_truck_action(
+                                    &mill.id, brand_id, &truck.id, "manual", "mill", None,
                                 ));
                             }
                             for crane in state.cranes.values() {
@@ -653,20 +550,27 @@ impl SugarProblem {
                                     && truck.remaining_capacity > crane.capacity
                                     && *amount > crane.capacity
                                 {
-                                    actions.push(Self::get_possible_load_truck_crane_mill_action(
-                                        &mill.id, brand_id, &truck.id, &crane.id,
+                                    actions.push(Self::get_possible_load_truck_action(
+                                        &mill.id,
+                                        brand_id,
+                                        &truck.id,
+                                        "crane",
+                                        "mill",
+                                        Some(&crane.id),
                                     ));
                                 }
                             }
                         }
                     }
                 }
+
+                // Check depots
                 for depot in state.depots.values() {
                     if truck.location == depot.location {
                         for (brand_id, amount) in depot.brand_storage.iter() {
                             if *amount > 0 {
-                                actions.push(Self::get_possible_load_truck_manual_depot_action(
-                                    &depot.id, brand_id, &truck.id,
+                                actions.push(Self::get_possible_load_truck_action(
+                                    &depot.id, brand_id, &truck.id, "manual", "depot", None,
                                 ));
                             }
                             for crane in state.cranes.values() {
@@ -675,8 +579,13 @@ impl SugarProblem {
                                     && truck.remaining_capacity > crane.capacity
                                     && *amount > crane.capacity
                                 {
-                                    actions.push(Self::get_possible_load_truck_crane_depot_action(
-                                        &depot.id, brand_id, &truck.id, &crane.id,
+                                    actions.push(Self::get_possible_load_truck_action(
+                                        &depot.id,
+                                        brand_id,
+                                        &truck.id,
+                                        "crane",
+                                        "depot",
+                                        Some(&crane.id),
                                     ));
                                 }
                             }
@@ -688,6 +597,15 @@ impl SugarProblem {
 
         actions
     }
+
+    pub fn get_possible_drive_truck_action(from: &i32, to: &i32, truck_id: &String) -> Action {
+        let mut parameters = HashMap::new();
+        let action_name = format!("drive_truck_{}_from_{}_to_{}", truck_id, from, to);
+        parameters.insert("to".to_string(), Value::Int(*to));
+        parameters.insert("truck".to_string(), Value::Text(truck_id.clone()));
+        Action::new(action_name, 1, parameters)
+    }
+
     pub fn get_possible_drive_truck_actions(&self, state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
         for truck in state.trucks.values() {
@@ -701,7 +619,11 @@ impl SugarProblem {
                                 .and_then(|map| map.get(&mill2.id))
                                 .unwrap_or(&false)
                             {
-                                todo!("Add drive from mill1 -> mill2");
+                                actions.push(Self::get_possible_drive_truck_action(
+                                    &mill1.location,
+                                    &mill2.location,
+                                    &truck.id,
+                                ));
                             }
                         }
                         if truck.location == mill2.location {
@@ -711,7 +633,11 @@ impl SugarProblem {
                                 .and_then(|map| map.get(&mill1.id))
                                 .unwrap_or(&false)
                             {
-                                todo!("Add drive from mill2 -> mill1");
+                                actions.push(Self::get_possible_drive_truck_action(
+                                    &mill2.location,
+                                    &mill1.location,
+                                    &truck.id,
+                                ));
                             }
                         }
                     }
@@ -724,7 +650,11 @@ impl SugarProblem {
                             .and_then(|map| map.get(&depot.id))
                             .unwrap_or(&false)
                         {
-                            todo!("Add drive from mill1 -> depot");
+                            actions.push(Self::get_possible_drive_truck_action(
+                                &mill1.location,
+                                &depot.location,
+                                &truck.id,
+                            ));
                         }
                     }
                     if truck.location == depot.location {
@@ -734,7 +664,11 @@ impl SugarProblem {
                             .and_then(|map| map.get(&mill1.id))
                             .unwrap_or(&false)
                         {
-                            todo!("Add drive from depot -> mill1");
+                            actions.push(Self::get_possible_drive_truck_action(
+                                &depot.location,
+                                &mill1.location,
+                                &truck.id,
+                            ));
                         }
                     }
                 }
@@ -742,14 +676,73 @@ impl SugarProblem {
         }
         actions
     }
-    pub fn get_possible_unload_truck_actions(state: &State) -> Vec<Action> {
-        let mut actions = Vec::new();
 
-        actions
-    }
     pub fn get_possible_maintainence_crane_actions(state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
+        for crane in state.cranes.values() {
+            if crane.maintenance == 0 {
+                let mut parameters = HashMap::new();
+                let action_name = format!("maintainence_{}", crane.id);
+                parameters.insert("crane".to_string(), Value::Text(crane.id.clone()));
+                actions.push(Action::new(action_name, 1, parameters));
+            }
+        }
+        actions
+    }
 
+    pub fn get_possible_unload_truck_action(
+        place_id: &String, // Now works for both mills & depots
+        truck_id: &String,
+        brand_id: &String,
+        mode: &str,       // "single" or "max"
+        place_type: &str, // "mill" or "depot"
+    ) -> Action {
+        let mut parameters = HashMap::new();
+        let action_name = format!(
+            "unload_brand_{}_from_{}_to_{}_{}",
+            brand_id, truck_id, place_type, place_id
+        );
+
+        parameters.insert("place".to_string(), Value::Text(place_id.clone())); // Generic place ID
+        parameters.insert("truck".to_string(), Value::Text(truck_id.clone()));
+        parameters.insert("brand".to_string(), Value::Text(brand_id.clone()));
+        parameters.insert("unload".to_string(), Value::Text(mode.to_string()));
+        parameters.insert(
+            "place_type".to_string(),
+            Value::Text(place_type.to_string()),
+        ); // Mill or Depot
+
+        Action::new(action_name, 1, parameters)
+    }
+
+    pub fn get_possible_unload_truck_actions(state: &State) -> Vec<Action> {
+        let mut actions = Vec::new();
+        for truck in state.trucks.values() {
+            for (brand_id, amount) in truck.brand_load.iter() {
+                if *amount > 0 {
+                    for mill in state.mills.values() {
+                        if mill.location == truck.location {
+                            actions.push(Self::get_possible_unload_truck_action(
+                                &mill.id, &truck.id, &brand_id, "single", "mill",
+                            ));
+                            actions.push(Self::get_possible_unload_truck_action(
+                                &mill.id, &truck.id, &brand_id, "max", "mill",
+                            ));
+                        }
+                    }
+                    for depot in state.depots.values() {
+                        if depot.location == truck.location {
+                            actions.push(Self::get_possible_unload_truck_action(
+                                &depot.id, &truck.id, &brand_id, "single", "depot",
+                            ));
+                            actions.push(Self::get_possible_unload_truck_action(
+                                &depot.id, &truck.id, &brand_id, "max", "depot",
+                            ));
+                        }
+                    }
+                }
+            }
+        }
         actions
     }
 }
@@ -761,9 +754,11 @@ impl Problem for SugarProblem {
         actions.extend(self.get_possible_place_order_or_switch_production_actions(state));
         actions.extend(Self::get_possible_harvest_cane_actions(state));
         actions.extend(self.get_possible_raw_cane_between_mills_actions(state));
-        actions.extend(Self::get_possible_load_truck_actions(state));
-        actions.extend(Self::get_possible_maintainence_crane_actions(state));
         actions.extend(self.get_possible_drive_truck_actions(state));
+        actions.extend(Self::get_possible_load_truck_actions(state));
+        actions.extend(Self::get_possible_unload_truck_actions(state));
+        actions.extend(Self::get_possible_maintainence_crane_actions(state));
+
         actions
     }
     fn apply_action(&self, state: &Self::State, action: &Action) -> Self::State {
