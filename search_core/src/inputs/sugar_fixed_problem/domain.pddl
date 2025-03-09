@@ -101,10 +101,10 @@
         (in-storage ?l - location ?b - brand)
 	
         ; Represents the cumulative distance traveled by vehicles in the supply chain, used for cost estimation.
-        (total-distance)
+        ; (total-distance) we can add this
   
         ; Specifies the distance between two locations ?l1 and ?l2, which can be used to calculate transportation costs.
-        (distance ?l1 ?l2 - location)
+        ; (distance ?l1 ?l2 - location) we can add this
 
         ; Tracks the quantity of raw cane available at mill ?m.
         (has-resource ?r - raw-cane ?m - mill)
@@ -143,6 +143,8 @@
     ;   - Decreases raw cane by 1 unit.
     ;   - Marks the mill as unavailable (busy) for the next production cycle.
     ;   - Increases the mill's total cost by the process cost.
+    
+    
     (:action produce_sugar_from_single_raw
 		:parameters (?r - raw-cane ?m - mill ?b - brand)
 		:precondition (and 
@@ -173,6 +175,8 @@
     ;   - Decreases the raw cane resource ?r2 by one unit.
     ;   - Marks the mill as unavailable (busy) for further production until reset.
     ;   - Increases the mill's total cost by the process cost.
+    
+    
     (:action produce_sugar_from_mixed_raw
         :parameters (?r1 ?r2 - raw-cane ?m - mill ?b - brand)
         :precondition (and 
@@ -203,7 +207,9 @@
     ;   - Decreases raw cane by max-produce units.
     ;   - Marks the mill as unavailable (busy).
     ;   - Increases the mill's total cost by 5 times the process cost.
-	(:action produce_sugar_from_single_raw_max
+	
+    
+    (:action produce_sugar_from_single_raw_max
 		:parameters (?r - raw-cane ?m - mill ?b - brand)
 		:precondition (and 
 				(current-brand-process ?m ?b)
@@ -232,7 +238,9 @@
     ;   - Decreases raw cane by max-produce units.
     ;   - Marks the mill as unavailable (busy).
     ;   - Increases the mill's total cost by 5 times the process cost.
-	(:action produce_sugar_from_single_raw_max
+	
+    
+    (:action produce_sugar_from_mixed_raw_max
 		:parameters (?r1 ?r2 - raw-cane ?m - mill ?b - brand)
 		:precondition (and 
 				(current-brand-process ?m ?b)
@@ -262,6 +270,8 @@
     ;   - Sets the raw cane resource at the mill to zero.
     ;   - Marks the mill as unavailable (busy).
     ;   - Increases the mill's total cost by 4 times the process cost.
+    
+    
     (:action produce_sugar_from_single_raw_resource
 		:parameters (?r - raw-cane ?m - mill ?b - brand)
 		:precondition (and 
@@ -269,6 +279,7 @@
 				(available ?m)
                 (single-raw-cane-production ?r ?b)
 			    (< (has-resource ?r ?m)(max-produce ?m))
+                (> (has-resource ?r ?m)0)
 		     	     )
 		:effect	     (and
 				(increase (in-storage ?m ?b)(has-resource ?r ?m))
@@ -290,6 +301,8 @@
     ;   - Sets the raw cane resource at the mill to zero.
     ;   - Marks the mill as unavailable (busy).
     ;   - Increases the mill's total cost by 4 times the process cost.
+   
+   
     (:action produce_sugar_from_mixed_raw_resource
 		:parameters (?r1 ?r2 - raw-cane ?m - mill ?b - brand)
 		:precondition (and 
@@ -298,6 +311,8 @@
                 (mixed-raw-cane-production ?r1 ?r2 ?b)
 			    (< (has-resource ?r1 ?m)(max-produce ?m))
                 (< (has-resource ?r2 ?m)(max-produce ?m))
+                (> (has-resource ?r1 ?m)0)
+                (> (has-resource ?r2 ?m)0)
                 (< (has-resource ?r1 ?m)(has-resource ?r2 ?m))
 		     	     )
 		:effect	     (and
@@ -329,6 +344,8 @@
                 (mixed-raw-cane-production ?r1 ?r2 ?b)
 			    (< (has-resource ?r1 ?m)(max-produce ?m))
                 (< (has-resource ?r2 ?m)(max-produce ?m))
+                (> (has-resource ?r1 ?m)0)
+                (> (has-resource ?r2 ?m)0)
                 (< (has-resource ?r2 ?m)(has-resource ?r1 ?m))
 		     	     )
 		:effect	     (and
