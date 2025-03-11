@@ -2,13 +2,13 @@
 
 This document describes the **Zenotravel domain**, extended to include **total-time tracking** for flight durations.
 
----
+
 
 ## Overview
 
 The **Zenotravel domain** models air travel with constraints on **fuel consumption** and **passenger capacity**. In this extended version, new **functions** and **actions** have been added to track **flight durations**, enabling more detailed planning and optimization.
 
----
+
 
 ## Key Features & Changes
 
@@ -32,7 +32,7 @@ To account for flight duration, the following functions were added:
 - **NEW**: Increases `total-time` based on the distance and `fast-speed`.
 - Restricted by the `zoom-limit` (passenger capacity for fast travel).
 
----
+
 
 ## Predicates
 These define the state of the world:
@@ -40,7 +40,7 @@ These define the state of the world:
 - **`located(?x - locatable, ?c - city)`** → Defines the location of an object.
 - **`in(?p - person, ?a - aircraft)`** → Indicates that a person is inside an aircraft.
 
----
+
 
 ## Functions
 These numerical functions track fuel levels, distances, and time:
@@ -57,7 +57,7 @@ These numerical functions track fuel levels, distances, and time:
 - **`slow-speed(?a - aircraft)`** → **(New!)** Speed of an aircraft during slow flights.
 - **`fast-speed(?a - aircraft)`** → **(New!)** Speed of an aircraft during fast flights.
 
----
+
 
 ## Actions
 
@@ -81,7 +81,6 @@ These numerical functions track fuel levels, distances, and time:
 ### 3. Refueling
 - **Refuel (`refuel`)** → Restores fuel to an aircraft's capacity.
 
----
 
 ## Summary
 This extended **Zenotravel domain** introduces **total-time tracking** for flights, allowing for more realistic travel planning. By differentiating between **slow and fast flights** with corresponding speeds, the domain now enables **time-aware decision-making** in automated planning.
