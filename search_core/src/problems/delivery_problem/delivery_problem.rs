@@ -1,11 +1,9 @@
 use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
-use serde_json::from_reader;
 use serde_json::Value as JsonValue;
-use std::collections::{BTreeMap, HashMap};
-use std::fs::File;
-use std::io::BufReader;
+use std::collections::HashMap;
+use std::fs; // Add this line
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Arm {
@@ -35,14 +33,15 @@ pub struct Item {
 pub struct State {
     pub bots: Vec<Bot>,
     pub items: Vec<Item>,
-    pub room_connections: BTreeMap<i32, Vec<i32>>,
     pub cost: i32,
 }
 
 impl StateTrait for State {}
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DeliveryProblem {
-    goal_locations: BTreeMap<i32, i32>, // item_id -> target_room_id
+    goal_locations: HashMap<String, i32>, // item_id -> target_room_id
+    room_connections: HashMap<String, Vec<i32>>
 }
 
 impl DeliveryProblem {
@@ -295,7 +294,7 @@ impl Problem for DeliveryProblem {
 
         // Move actions
         for bot in &state.bots {
-            if let Some(connected_rooms) = state.room_connections.get(&bot.location) {
+            if let Some(connected_rooms) = self.room_connections.get(&format!("room{}", bot.location)) {
                 for &next_room in connected_rooms {
                     actions.push(Self::possible_move_action(
                         bot.index,
@@ -305,6 +304,7 @@ impl Problem for DeliveryProblem {
                 }
             }
         }
+
 
         // Pick actions - only for items in rooms (not in arms or trays)
         for bot in &state.bots {
@@ -396,87 +396,31 @@ impl Problem for DeliveryProblem {
         }
     }
 
-    fn load_state_from_json(json_path: &str) -> (State, Self) {
-        let file = File::open(json_path).expect("Failed to open JSON file");
-        let reader = BufReader::new(file);
-        let json_data: JsonValue = from_reader(reader).expect("Failed to parse JSON");
+    fn load_state_from_json(json_path: &str) -> (State, DeliveryProblem) {
+        let json_str = fs::read_to_string(json_path).expect("Failed to read JSON file");
+        let json_value: JsonValue = serde_json::from_str(&json_str).expect("Failed to parse JSON");
 
-        let bots: Vec<Bot> = json_data["bots"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .map(|bot| Bot {
-                location: bot["location"].as_i64().unwrap() as i32,
-                load_limit: bot["load_limit"].as_i64().unwrap() as i32,
-                current_load: bot["current_load"].as_i64().unwrap() as i32,
-                index: bot["index"].as_i64().unwrap() as i32,
-                arms: bot["arms"]
-                    .as_array()
-                    .unwrap()
-                    .iter()
-                    .map(|arm| Arm {
-                        is_free: arm["is_free"].as_bool().unwrap(),
-                        side: arm["side"].as_i64().unwrap() as i32,
-                    })
-                    .collect(),
-            })
-            .collect();
+        let state_value = json_value
+            .get("state")
+            .expect("Missing 'state' field in JSON");
+        let problem_value = json_value
+            .get("problem")
+            .expect("Missing 'problem' field in JSON");
 
-        let items: Vec<Item> = json_data["items"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .map(|item| Item {
-                location: item["location"].as_i64().unwrap() as i32,
-                weight: item["weight"].as_i64().unwrap() as i32,
-                in_arm: item["in_arm"].as_i64().unwrap() as i32,
-                in_tray: item["in_tray"].as_i64().unwrap() as i32,
-                index: item["index"].as_i64().unwrap() as i32,
-            })
-            .collect();
+        let state: State = serde_json::from_value(state_value.clone())
+            .expect("Failed to deserialize state");
+        let problem: DeliveryProblem = serde_json::from_value(problem_value.clone())
+            .expect("Failed to deserialize problem");
 
-        let room_connections: BTreeMap<i32, Vec<i32>> = json_data["room_connections"]
-            .as_object()
-            .unwrap()
-            .iter()
-            .map(|(k, v)| {
-                (
-                    k.parse::<i32>().unwrap(),
-                    v.as_array()
-                        .unwrap()
-                        .iter()
-                        .map(|x| x.as_i64().unwrap() as i32)
-                        .collect(),
-                )
-            })
-            .collect();
-
-        let cost = json_data["cost"].as_i64().unwrap() as i32;
-
-        let goal_locations: BTreeMap<i32, i32> = json_data["goal_locations"]
-            .as_object()
-            .unwrap()
-            .iter()
-            .map(|(k, v)| (k.parse::<i32>().unwrap(), v.as_i64().unwrap() as i32))
-            .collect();
-
-        (
-            State {
-                bots,
-                items,
-                room_connections,
-                cost,
-            },
-            Self { goal_locations },
-        )
+        (state, problem)
     }
 
     fn is_goal_state(&self, state: &State) -> bool {
-        self.goal_locations.iter().all(|(&item, &target_room)| {
+        self.goal_locations.iter().all(|(item_id, &target_room)| {
             state
                 .items
                 .iter()
-                .any(|i| i.index == item && i.location == target_room)
+                .any(|i| i.index.to_string() == *item_id && i.location == target_room)
         })
     }
 

@@ -1,11 +1,10 @@
 use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
-use serde_json::from_reader;
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::BufReader;
+use std::fs;
+
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Boat {
@@ -37,6 +36,7 @@ impl PartialEq for State {
 
 impl Eq for State {}
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SailingProblem {}
 
 impl SailingProblem {
@@ -262,36 +262,28 @@ impl Problem for SailingProblem {
         state.persons.iter().all(|person| person.saved)
     }
 
+    
+
     fn load_state_from_json(json_path: &str) -> (State, Self) {
-        let file = File::open(json_path).expect("Failed to open JSON file");
-        let reader = BufReader::new(file);
-        let json_data: JsonValue = from_reader(reader).expect("Failed to parse JSON");
+    let json_str = fs::read_to_string(json_path).expect("Failed to read JSON file");
+    let json_value: JsonValue = serde_json::from_str(&json_str).expect("Failed to parse JSON");
 
-        let boats = json_data["boats"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .map(|boat| Boat {
-                x: boat["x"].as_f64().unwrap(),
-                y: boat["y"].as_f64().unwrap(),
-                index: boat["index"].as_i64().unwrap() as i32,
-            })
-            .collect();
+    let state_value = json_value
+        .get("state")
+        .expect("Missing 'state' field in JSON");
+    let problem_value = json_value
+        .get("problem")
+        .expect("Missing 'problem' field in JSON");
 
-        let persons = json_data["persons"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .map(|person| Person {
-                d: person["d"].as_f64().unwrap(),
-                saved: person["saved"].as_bool().unwrap(),
-                index: person["index"].as_i64().unwrap() as i32,
-            })
-            .collect();
+    let state: State = serde_json::from_value(state_value.clone())
+        .expect("Failed to deserialize state");
+    let problem: SailingProblem = serde_json::from_value(problem_value.clone())
+        .expect("Failed to deserialize problem");
 
-        let state = State { boats, persons };
-        (state, SailingProblem {})
-    }
+    (state, problem)
+}
+
+
 
     fn heuristic(&self, state: &State) -> f64 {
         // Simple heuristic: count unsaved people
