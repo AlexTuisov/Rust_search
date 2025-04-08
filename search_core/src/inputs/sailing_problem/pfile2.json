@@ -1,32 +1,41 @@
 {
-    "boats": [
-        {
-            "x": 7.0,
-            "y": 0.0,
-            "index": 0
-        },
-        {
-            "x": -7.0,
-            "y": 0.0,
-            "index": 1
+    "state": {
+        "boats": [
+            {
+                "id": "b0",
+                "x": 7.0,
+                "y": 0.0,
+                "index": 0
+            },
+            {
+                "id": "b1",
+                "x": -7.0,
+                "y": 0.0,
+                "index": 1
+            }
+        ],
+        "persons": [
+            {
+                "id": "p0",
+                "d": -370.0,
+                "saved": false,
+                "index": 0
+            },
+            {
+                "id": "p1",
+                "d": -58.0,
+                "saved": false,
+                "index": 1
+            }
+        ],
+        "cost": 0
+    },
+    "problem": {
+        "goal": {
+            "saved_persons": [
+                "p0",
+                "p1"
+            ]
         }
-    ],
-    "persons": [
-        {
-            "d": -370.0,
-            "saved": false,
-            "index": 0
-        },
-        {
-            "d": -58.0,
-            "saved": false,
-            "index": 1
-        }
-    ],
-    "goal": {
-        "saved_persons": [
-            0,
-            1
-        ]
     }
 }

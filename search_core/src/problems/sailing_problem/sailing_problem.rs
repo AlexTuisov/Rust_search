@@ -3,22 +3,24 @@ use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
+use ordered_float::OrderedFloat;
 use std::fs;
 
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Boat {
-    pub x: f64,
-    pub y: f64,
+    pub x: OrderedFloat<f64>,
+    pub y: OrderedFloat<f64>,
     pub index: i32,
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Person {
-    pub d: f64,
+    pub d: OrderedFloat<f64>,
     pub saved: bool,
     pub index: i32,
 }
+
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct State {
@@ -85,8 +87,8 @@ impl SailingProblem {
     pub fn save_person_action(boat: &Boat, person: &Person) -> Option<Action> {
         if boat.x + boat.y >= person.d
             && boat.y - boat.x >= person.d
-            && boat.x + boat.y <= person.d + 25.0
-            && boat.y - boat.x <= person.d + 25.0
+            && boat.x + boat.y <= person.d + OrderedFloat(25.0)
+            && boat.y - boat.x <= person.d + OrderedFloat(25.0)
         {
             let mut parameters = HashMap::new();
             parameters.insert("boat".to_string(), Value::Int(boat.index));
@@ -108,8 +110,8 @@ impl SailingProblem {
         };
         let mut new_state = state.clone();
         if let Some(boat) = new_state.boats.iter_mut().find(|b| b.index == boat_index) {
-            boat.x += 1.5;
-            boat.y += 1.5;
+            boat.x += OrderedFloat(1.5);
+            boat.y += OrderedFloat(1.5);
         }
         new_state
     }
@@ -121,8 +123,8 @@ impl SailingProblem {
         };
         let mut new_state = state.clone();
         if let Some(boat) = new_state.boats.iter_mut().find(|b| b.index == boat_index) {
-            boat.x -= 1.5;
-            boat.y += 1.5;
+            boat.x -= OrderedFloat(1.5);
+            boat.y += OrderedFloat(1.5);
         }
         new_state
     }
@@ -134,7 +136,7 @@ impl SailingProblem {
         };
         let mut new_state = state.clone();
         if let Some(boat) = new_state.boats.iter_mut().find(|b| b.index == boat_index) {
-            boat.x += 3.0;
+            boat.x += OrderedFloat(3.0);
         }
         new_state
     }
@@ -146,7 +148,7 @@ impl SailingProblem {
         };
         let mut new_state = state.clone();
         if let Some(boat) = new_state.boats.iter_mut().find(|b| b.index == boat_index) {
-            boat.x -= 3.0;
+            boat.x -= OrderedFloat(3.0);
         }
         new_state
     }
@@ -158,8 +160,8 @@ impl SailingProblem {
         };
         let mut new_state = state.clone();
         if let Some(boat) = new_state.boats.iter_mut().find(|b| b.index == boat_index) {
-            boat.x += 2.0;
-            boat.y -= 2.0;
+            boat.x += OrderedFloat(2.0);
+            boat.y -= OrderedFloat(2.0);
         }
         new_state
     }
@@ -171,8 +173,8 @@ impl SailingProblem {
         };
         let mut new_state = state.clone();
         if let Some(boat) = new_state.boats.iter_mut().find(|b| b.index == boat_index) {
-            boat.x -= 2.0;
-            boat.y -= 2.0;
+            boat.x -= OrderedFloat(2.0);
+            boat.y -= OrderedFloat(2.0);
         }
         new_state
     }
@@ -184,7 +186,7 @@ impl SailingProblem {
         };
         let mut new_state = state.clone();
         if let Some(boat) = new_state.boats.iter_mut().find(|b| b.index == boat_index) {
-            boat.y -= 2.0;
+            boat.y -= OrderedFloat(2.0);
         }
         new_state
     }
@@ -286,8 +288,6 @@ impl Problem for SailingProblem {
 
 
     fn heuristic(&self, state: &State) -> f64 {
-        // Simple heuristic: count unsaved people
-        //state.persons.iter().filter(|p| !p.saved).count() as f64
         0.0
     }
 }
