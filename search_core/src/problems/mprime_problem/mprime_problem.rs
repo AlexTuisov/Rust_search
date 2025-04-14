@@ -43,9 +43,32 @@ pub struct Condition {
 pub struct Goal {
     conditions: Vec<Condition>,
 }
+
 impl Goal {
     pub fn is_goal_state(state: &State) -> bool {
-        todo!("Complete it")
+        for condition in &self.conditions {
+            let emotion = &condition.emotion;
+            let food = &condition.food;
+
+            // Try to find the emotion in pleasures
+            let found_in_pleasures = state
+                .pleasures
+                .iter()
+                .find(|p| &p.name == emotion)
+                .map_or(false, |p| p.craves.contains(food));
+
+            // If not in pleasures, try in pains
+            let found_in_pains = state
+                .pains
+                .iter()
+                .find(|p| &p.name == emotion)
+                .map_or(false, |p| p.craves.contains(food));
+
+            if !found_in_pleasures && !found_in_pains {
+                return false;
+            }
+        }
+        true
     }
 }
 
@@ -64,10 +87,12 @@ impl MPrimeProblem {
                         if pleasure.craves.contains(&food.name) && pain.craves.contains(&food.name)
                         {
                             let mut parameters = std::collections::HashMap::new();
-                            let action_name = format!("over_come_{}_{}_{}", pleasure.name,pain.name,food.name);
-                            parameters.insert("pleasure".to_string(), Value::Text(pleasure.name.clone()));
+                            let action_name =
+                                format!("over_come_{}_{}_{}", pleasure.name, pain.name, food.name);
+                            parameters
+                                .insert("pleasure".to_string(), Value::Text(pleasure.name.clone()));
                             parameters.insert("pain".to_string(), Value::Text(pain.name.clone()));
-                            parameters.insert("food".to_string(), Value::Text(food.name.clone()));    
+                            parameters.insert("food".to_string(), Value::Text(food.name.clone()));
                             actions.push(Action::new(action_name, 1, parameters));
                         }
                     }
@@ -80,23 +105,195 @@ impl MPrimeProblem {
     pub fn get_succumb_actions(state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
         for pleasure in &state.pleasures {
-            
-                for pain in &state.pains {
-                    for food in &state.foods {
-                        if pleasure.craves.contains(&food.name) && pain.craves.contains(&food.name)
-                        {
+            for pain in &state.pains {
+                for food in &state.foods {
+                    if pleasure.craves.contains(&food.name) && pain.fears.contains(&pleasure.name) {
+                        let mut parameters = std::collections::HashMap::new();
+                        let action_name =
+                            format!("succumb_{}_{}_{}", pleasure.name, pain.name, food.name);
+                        parameters
+                            .insert("pleasure".to_string(), Value::Text(pleasure.name.clone()));
+                        parameters.insert("pain".to_string(), Value::Text(pain.name.clone()));
+                        parameters.insert("food".to_string(), Value::Text(food.name.clone()));
+                        actions.push(Action::new(action_name, 1, parameters));
+                    }
+                }
+            }
+        }
+        actions
+    }
+
+    pub fn get_feast_actions(&self, state: &State) -> Vec<Action> {
+        let mut actions = Vec::new();
+        for pleasure in &state.pleasures {
+            for food1 in &state.foods {
+                if pleasure.craves.contains(&food1.name) && food1.locale >= 1 {
+                    for food2 in &state.foods {
+                        if *self.eats.get(&food1.name).contain(&food2) {
                             let mut parameters = std::collections::HashMap::new();
-                            let action_name = format!("over_come_{}_{}_{}", pleasure.name,pain.name,food.name);
-                            parameters.insert("pleasure".to_string(), Value::Text(pleasure.name.clone()));
-                            parameters.insert("pain".to_string(), Value::Text(pain.name.clone()));
-                            parameters.insert("food".to_string(), Value::Text(food.name.clone()));    
+                            let action_name =
+                                format!("feast_{}_{}_{}", pleasure.name, food1.name, food2.name);
+                            parameters
+                                .insert("pleasure".to_string(), Value::Text(pleasure.name.clone()));
+                            parameters.insert("food1".to_string(), Value::Text(food1.name.clone()));
+                            parameters.insert("food2".to_string(), Value::Text(food2.name.clone()));
                             actions.push(Action::new(action_name, 1, parameters));
                         }
                     }
                 }
-            
+            }
         }
         actions
+    }
+
+    pub fn get_drink_actions(state: &State) -> Vec<Action> {
+        let mut actions = Vec::new();
+
+        for food1 in &state.foods {
+            if food1.locale >= 1 {
+                for food2 in &state.foods {
+                    if food1.name != food2.name {
+                        let mut parameters = std::collections::HashMap::new();
+                        let action_name = format!("drink_{}_{}", food1.name, food2.name);
+
+                        parameters.insert("food1".to_string(), Value::Text(food1.name.clone()));
+                        parameters.insert("food2".to_string(), Value::Text(food2.name.clone()));
+                        actions.push(Action::new(action_name, 1, parameters));
+                    }
+                }
+            }
+        }
+        actions
+    }
+
+    pub fn apply_drink_action(state: &State, action: &Action) -> State {
+        // Start by cloning the current state.
+        let mut new_state = state.clone();
+        let food1_name = match action.parameters.get("food1") {
+            Some(Value::Text(name)) => name,
+            _ => panic!("Action parameters do not contain a valid name for food."),
+        };
+        let food2_name = match action.parameters.get("food2") {
+            Some(Value::Text(name)) => name,
+            _ => panic!("Action parameters do not contain a valid name for food."),
+        };
+        let food1_index = new_state
+            .foods
+            .iter()
+            .position(|v| v.name == *food1_name)
+            .expect(&format!("Food with name {} not found", food1_name));
+
+        let food2_index = new_state
+            .foods
+            .iter()
+            .position(|v| v.name == *food2_name)
+            .expect(&format!("Food with name {} not found", food2_name));
+
+        new_state.foods[food1_index].locale -= 1;
+        new_state.foods[food2_index].locale += 1;
+
+        new_state
+    }
+
+    pub fn apply_succumb_action(state: &State, action: &Action) -> State {
+        // Start by cloning the current state.
+        let mut new_state = state.clone();
+        let pain_name = match action.parameters.get("pain") {
+            Some(Value::Text(name)) => name,
+            _ => panic!("Action parameters do not contain a valid name for pain."),
+        };
+        let food_name = match action.parameters.get("food") {
+            Some(Value::Text(name)) => name,
+            _ => panic!("Action parameters do not contain a valid name for food."),
+        };
+        let pleasure_name = match action.parameters.get("pleasure") {
+            Some(Value::Text(name)) => name,
+            _ => panic!("Action parameters do not contain a valid name for pleasure."),
+        };
+        let pleasure = new_state
+            .pleasures
+            .iter_mut()
+            .find(|v| v.name == *pleasure_name)
+            .expect(&format!("Pleasure with name {} not found", pleasure_name));
+
+        pleasure.harmony += 1;
+
+        let pain = new_state
+            .pains
+            .iter_mut()
+            .find(|v| v.name == *pleasure_name)
+            .expect(&format!("Pain with name {} not found", pain_name));
+        pain.craves.push(food_name);
+        pain.fears.retain(|f| f != pleasure_name);
+
+        new_state
+    }
+    pub fn apply_feast_action(state: &State, action: &Action) -> State {
+        // Start by cloning the current state.
+        let mut new_state = state.clone();
+        let food1_name = match action.parameters.get("food1") {
+            Some(Value::Text(name)) => name,
+            _ => panic!("Action parameters do not contain a valid name for food."),
+        };
+        let food2_name = match action.parameters.get("food2") {
+            Some(Value::Text(name)) => name,
+            _ => panic!("Action parameters do not contain a valid name for food."),
+        };
+        let pleasure_name = match action.parameters.get("pleasure") {
+            Some(Value::Text(name)) => name,
+            _ => panic!("Action parameters do not contain a valid name for pleasure."),
+        };
+        let pleasure = new_state
+            .pleasures
+            .iter_mut()
+            .find(|v| v.name == *pleasure_name)
+            .expect(&format!("Pleasure with name {} not found", pleasure_name));
+        let food1 = new_state
+            .foods
+            .iter_mut()
+            .find(|v| v.name == *food1_name)
+            .expect(&format!("Food with name {} not found", food1_name));
+
+        food1.locale -= 1;
+
+        pleasure.craves.retain(|f| f != food1_name);
+        pleasure.craves.push(food2_name);
+
+        new_state
+    }
+
+    pub fn apply_over_come_action(state: &State, action: &Action) -> State {
+        // Start by cloning the current state.
+        let mut new_state = state.clone();
+        let pain_name = match action.parameters.get("pain") {
+            Some(Value::Text(name)) => name,
+            _ => panic!("Action parameters do not contain a valid name for pain."),
+        };
+        let food_name = match action.parameters.get("food") {
+            Some(Value::Text(name)) => name,
+            _ => panic!("Action parameters do not contain a valid name for food."),
+        };
+        let pleasure_name = match action.parameters.get("pleasure") {
+            Some(Value::Text(name)) => name,
+            _ => panic!("Action parameters do not contain a valid name for pleasure."),
+        };
+        let pleasure = new_state
+            .pleasures
+            .iter_mut()
+            .find(|v| v.name == *pleasure_name)
+            .expect(&format!("Pleasure with name {} not found", pleasure_name));
+        let pain = new_state
+            .pains
+            .iter_mut()
+            .find(|v| v.name == *pain_name)
+            .expect(&format!("Pain with name {} not found", pain_name));
+
+        pleasure.harmony -= 1;
+
+        pain.craves.retain(|f| f != food_name);
+        pain.fears.push(pleasure_name);
+
+        new_state
     }
 }
 
@@ -114,12 +311,14 @@ impl Problem for MPrimeProblem {
     }
 
     fn apply_action(&self, state: &State, action: &Action) -> State {
-        if action.name.starts_with("move_slow_") {
-            Self::apply_move_slow_action(state, action)
-        } else if action.name.starts_with("move_by_car_") {
-            Self::apply_move_by_car_action(state, action)
-        } else if action.name.starts_with("hire_car") {
-            Self::apply_hire_car_action(state, action)
+        if action.name.starts_with("drink_") {
+            Self::apply_drink_action(state, action)
+        } else if action.name.starts_with("feast_") {
+            Self::apply_feast_action(state, action)
+        } else if action.name.starts_with("succumb_") {
+            Self::apply_succumb_action(state, action)
+        } else if action.name.starts_with("over_come_") {
+            Self::apply_over_come_action(state, action)
         } else {
             panic!("Unknown action type: {}", action.name)
         }
