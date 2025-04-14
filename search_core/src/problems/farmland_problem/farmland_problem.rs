@@ -22,9 +22,7 @@ pub struct Farm {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SubCondition {
     farm_name: String,
-    farm_constant: i32,
-    operator: String,
-    constant: i32,
+    farm_constant: OrderedFloat<f64>,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Goal {
@@ -35,7 +33,25 @@ pub struct Goal {
 
 impl Goal {
     pub fn is_goal_state(&self, state: &State) -> bool {
-        !todo("Convertor first")
+        let mut sum = 0.0;
+
+        for cond in &self.farms {
+            let farm = state.farms.iter().find(|f| f.name == cond.farm_name);
+            if let Some(f) = farm {
+                sum += cond.farm_constant.into_inner() * f.value as f64;
+            } else {
+                panic!("Farm {} not found in state", cond.farm_name);
+            }
+        }
+
+        match self.operator.as_str() {
+            ">=" => sum >= self.value as f64,
+            "<=" => sum <= self.value as f64,
+            ">"  => sum > self.value as f64,
+            "<"  => sum < self.value as f64,
+            "==" | "=" => (sum - self.value as f64).abs() < 1e-6,
+            _ => panic!("Unsupported operator in goal: {}", self.operator),
+        }
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -47,9 +63,9 @@ pub struct FarmLandProblem {
 impl FarmLandProblem {
     pub fn get_move_fast_action(&self, farm: &Farm) -> Vec<Action> {
         let mut actions = Vec::new();
-        if let Some(farms) = &self.adj.get(&farm.name) {
+        if let Some(farms) = self.adj.get(&farm.name) {
             for farm_adj in farms {
-                if (farm.name != farm_adj) {
+                if (farm.name != *farm_adj) {
                     let mut parameters = std::collections::HashMap::new();
                     let action_name = format!("move_fast_{}_{}", farm.name, farm_adj);
                     parameters.insert("from".to_string(), Value::Text(farm.name.clone()));
@@ -62,9 +78,9 @@ impl FarmLandProblem {
     }
     pub fn get_move_slow_action(&self, farm: &Farm) -> Vec<Action> {
         let mut actions = Vec::new();
-        if let Some(farms) = &self.adj.get(&farm.name) {
+        if let Some(farms) = self.adj.get(&farm.name) {
             for farm_adj in farms {
-                if (farm.name != farm_adj) {
+                if (farm.name != *farm_adj) {
                     let mut parameters = std::collections::HashMap::new();
                     let action_name = format!("move_slow_{}_{}", farm.name, farm_adj);
                     parameters.insert("from".to_string(), Value::Text(farm.name.clone()));
@@ -89,7 +105,7 @@ impl FarmLandProblem {
         actions
     }
 
-    pub fn apply_move_slow_action(state: &State, action: &Action) {
+    pub fn apply_move_slow_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
         let farm_from_name = match action.parameters.get("from") {
             Some(Value::Text(name)) => name,
@@ -101,24 +117,25 @@ impl FarmLandProblem {
             _ => panic!("Action parameters do not contain a valid name for farm."),
         };
 
-        let farm_from = new_state
+        let from_index = new_state
             .farms
-            .iter_mut()
-            .find(|v| v.name == *farm_from_name)
-            .unwrap_or_else(|| panic!("Farm with name {} not found", farm_from_name));
+            .iter()
+            .position(|v| v.name == *farm_from_name)
+            .expect(&format!("Farm with name {} not found", farm_from_name));
 
-        let farm_to = new_state
+        let to_index = new_state
             .farms
-            .iter_mut()
-            .find(|v| v.name == *farm_to_name)
-            .unwrap_or_else(|| panic!("Farm with name {} not found", farm_to_name));
-        farm_from.value -= 1;
-        farm_to.value += 1;
+            .iter()
+            .position(|v| v.name == *farm_to_name)
+            .expect(&format!("Farm with name {} not found", farm_to_name));
+
+        new_state.farms[from_index].value -= 1;
+        new_state.farms[to_index].value += 1;
 
         new_state
     }
 
-    pub fn apply_move_fast_action(state: &State, action: &Action) {
+    pub fn apply_move_fast_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
         let farm_from_name = match action.parameters.get("from") {
             Some(Value::Text(name)) => name,
@@ -130,19 +147,20 @@ impl FarmLandProblem {
             _ => panic!("Action parameters do not contain a valid name for farm."),
         };
 
-        let farm_from = new_state
+        let from_index = new_state
             .farms
-            .iter_mut()
-            .find(|v| v.name == *farm_from_name)
-            .unwrap_or_else(|| panic!("Farm with name {} not found", farm_from_name));
+            .iter()
+            .position(|v| v.name == *farm_from_name)
+            .expect(&format!("Farm with name {} not found", farm_from_name));
 
-        let farm_to = new_state
+        let to_index = new_state
             .farms
-            .iter_mut()
-            .find(|v| v.name == *farm_to_name)
-            .unwrap_or_else(|| panic!("Farm with name {} not found", farm_to_name));
-        farm_from.value -= 4;
-        farm_to.value += 2;
+            .iter()
+            .position(|v| v.name == *farm_to_name)
+            .expect(&format!("Farm with name {} not found", farm_to_name));
+
+        new_state.farms[from_index].value -= 4;
+        new_state.farms[to_index].value += 2;
 
         new_state
     }
