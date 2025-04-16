@@ -6,6 +6,7 @@ pub mod farm_problem;
 pub mod fo_counters_problem;
 pub mod fo_sailing_problem;
 pub mod market_trader_problem;
+pub mod mprime_problem;
 pub mod path_ways_metric_problem;
 pub mod problem;
 pub mod red_car_problem;
