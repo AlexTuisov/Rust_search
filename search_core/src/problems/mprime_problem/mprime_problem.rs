@@ -45,7 +45,7 @@ pub struct Goal {
 }
 
 impl Goal {
-    pub fn is_goal_state(state: &State) -> bool {
+    pub fn is_goal_state(&self,state: &State) -> bool {
         for condition in &self.conditions {
             let emotion = &condition.emotion;
             let food = &condition.food;
@@ -72,6 +72,7 @@ impl Goal {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MPrimeProblem {
     eats: HashMap<String, Vec<String>>,
     goal: Goal,
@@ -81,7 +82,7 @@ impl MPrimeProblem {
     pub fn get_over_come_actions(state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
         for pleasure in &state.pleasures {
-            if (pleasure.harmony >= 1) {
+            if pleasure.harmony >= 1 {
                 for pain in &state.pains {
                     for food in &state.foods {
                         if pleasure.craves.contains(&food.name) && pain.craves.contains(&food.name)
@@ -129,15 +130,17 @@ impl MPrimeProblem {
             for food1 in &state.foods {
                 if pleasure.craves.contains(&food1.name) && food1.locale >= 1 {
                     for food2 in &state.foods {
-                        if *self.eats.get(&food1.name).contain(&food2) {
-                            let mut parameters = std::collections::HashMap::new();
-                            let action_name =
-                                format!("feast_{}_{}_{}", pleasure.name, food1.name, food2.name);
-                            parameters
-                                .insert("pleasure".to_string(), Value::Text(pleasure.name.clone()));
-                            parameters.insert("food1".to_string(), Value::Text(food1.name.clone()));
-                            parameters.insert("food2".to_string(), Value::Text(food2.name.clone()));
-                            actions.push(Action::new(action_name, 1, parameters));
+                        if let Some(eats_vec) = self.eats.get(&food1.name) {
+                            if eats_vec.contains(&food2.name) {
+                                let mut parameters = std::collections::HashMap::new();
+                                let action_name =
+                                    format!("feast_{}_{}_{}", pleasure.name, food1.name, food2.name);
+                                parameters
+                                    .insert("pleasure".to_string(), Value::Text(pleasure.name.clone()));
+                                parameters.insert("food1".to_string(), Value::Text(food1.name.clone()));
+                                parameters.insert("food2".to_string(), Value::Text(food2.name.clone()));
+                                actions.push(Action::new(action_name, 1, parameters));
+                            }
                         }
                     }
                 }
@@ -223,7 +226,7 @@ impl MPrimeProblem {
             .iter_mut()
             .find(|v| v.name == *pleasure_name)
             .expect(&format!("Pain with name {} not found", pain_name));
-        pain.craves.push(food_name);
+        pain.craves.push(food_name.clone());
         pain.fears.retain(|f| f != pleasure_name);
 
         new_state
@@ -257,7 +260,7 @@ impl MPrimeProblem {
         food1.locale -= 1;
 
         pleasure.craves.retain(|f| f != food1_name);
-        pleasure.craves.push(food2_name);
+        pleasure.craves.push(food2_name.clone());
 
         new_state
     }
@@ -291,7 +294,7 @@ impl MPrimeProblem {
         pleasure.harmony -= 1;
 
         pain.craves.retain(|f| f != food_name);
-        pain.fears.push(pleasure_name);
+        pain.fears.push(pleasure_name.clone());
 
         new_state
     }
@@ -305,7 +308,7 @@ impl Problem for MPrimeProblem {
 
         actions.extend(Self::get_over_come_actions(state));
         actions.extend(self.get_feast_actions(state));
-        actions.extend(Self::get_sccumb_actions(state));
+        actions.extend(Self::get_succumb_actions(state));
         actions.extend(Self::get_drink_actions(state));
         actions
     }
