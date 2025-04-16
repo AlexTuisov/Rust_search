@@ -1,10 +1,9 @@
-use std::collections::HashMap;
 use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
+use std::collections::HashMap;
 use std::fs;
-
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
@@ -35,11 +34,9 @@ pub struct Airplane {
 
     /// Slow attributes.
     pub slow_burn: i32,
-   
 
     /// Fast attributes.
     pub fast_burn: i32,
-  
 
     /// Capacity attributes.
     pub capacity: i32,
@@ -178,7 +175,6 @@ impl ZenoTravelProblem {
                         parameters.insert("to".to_string(), Value::Int(j));
                         parameters.insert("distance".to_string(), Value::Int(distance));
                         let total_fuel = airplane.slow_burn * distance;
-                       
 
                         actions.push(Action::new(action_name, total_fuel, parameters));
                     }
@@ -305,7 +301,7 @@ impl ZenoTravelProblem {
         new_state.airplanes[airplane_index].fuel -=
             new_state.airplanes[airplane_index].slow_burn * distance;
         new_state.total_fuel_used += new_state.airplanes[airplane_index].slow_burn * distance;
-       
+
         new_state
     }
 
@@ -454,7 +450,6 @@ impl Problem for ZenoTravelProblem {
             .expect("Missing total_fuel_used")
             .as_i64()
             .expect("total_fuel_used not an integer") as i32;
-      
 
         // Now build the state manually.
         let state = State {

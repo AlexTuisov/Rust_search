@@ -1,7 +1,6 @@
 [workspace]
 members = [
     "search_core",
-    "app",
     "rust_search_module"
 ]
 
