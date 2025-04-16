@@ -1,10 +1,8 @@
 use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
 use ordered_float::OrderedFloat;
-use ordered_float::OrderedFloat;
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
-use std::collections::HashMap;
 use std::collections::HashMap;
 use std::fs;
 
