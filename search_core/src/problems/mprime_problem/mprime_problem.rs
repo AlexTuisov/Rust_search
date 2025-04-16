@@ -45,7 +45,7 @@ pub struct Goal {
 }
 
 impl Goal {
-    pub fn is_goal_state(&self,state: &State) -> bool {
+    pub fn is_goal_state(&self, state: &State) -> bool {
         for condition in &self.conditions {
             let emotion = &condition.emotion;
             let food = &condition.food;
@@ -133,12 +133,18 @@ impl MPrimeProblem {
                         if let Some(eats_vec) = self.eats.get(&food1.name) {
                             if eats_vec.contains(&food2.name) {
                                 let mut parameters = std::collections::HashMap::new();
-                                let action_name =
-                                    format!("feast_{}_{}_{}", pleasure.name, food1.name, food2.name);
+                                let action_name = format!(
+                                    "feast_{}_{}_{}",
+                                    pleasure.name, food1.name, food2.name
+                                );
+                                parameters.insert(
+                                    "pleasure".to_string(),
+                                    Value::Text(pleasure.name.clone()),
+                                );
                                 parameters
-                                    .insert("pleasure".to_string(), Value::Text(pleasure.name.clone()));
-                                parameters.insert("food1".to_string(), Value::Text(food1.name.clone()));
-                                parameters.insert("food2".to_string(), Value::Text(food2.name.clone()));
+                                    .insert("food1".to_string(), Value::Text(food1.name.clone()));
+                                parameters
+                                    .insert("food2".to_string(), Value::Text(food2.name.clone()));
                                 actions.push(Action::new(action_name, 1, parameters));
                             }
                         }
