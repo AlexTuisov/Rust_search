@@ -160,7 +160,7 @@ impl SailingProblem {
         };
         let mut new_state = state.clone();
         if let Some(boat) = new_state.boats.iter_mut().find(|b| b.index == boat_index) {
-            boat.x += OrderedFloat(2.0);
+            boat.x -= OrderedFloat(2.0);
             boat.y -= OrderedFloat(2.0);
         }
         new_state
@@ -173,7 +173,7 @@ impl SailingProblem {
         };
         let mut new_state = state.clone();
         if let Some(boat) = new_state.boats.iter_mut().find(|b| b.index == boat_index) {
-            boat.x -= OrderedFloat(2.0);
+            boat.x += OrderedFloat(2.0);
             boat.y -= OrderedFloat(2.0);
         }
         new_state
@@ -287,7 +287,7 @@ impl Problem for SailingProblem {
 
 
 
-    fn heuristic(&self, state: &State) -> f64 {
+    fn heuristic(&self, _state: &State) -> f64 {
         0.0
     }
 }

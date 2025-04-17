@@ -59,13 +59,13 @@ impl DroneProblem {
         Action::new(format!("decrease_z_{}", state.z), 1, parameters)
     }
 
-    pub fn possible_visit_action(state: &State, loc_id: String) -> Action {
+    pub fn possible_visit_action(_state: &State, loc_id: String) -> Action {
         let mut parameters = HashMap::new();
         parameters.insert("location".to_string(), Value::Text(loc_id.clone()));
         Action::new(format!("visit_{}", loc_id), 1, parameters)
     }
 
-    pub fn possible_recharge_action(state: &State) -> Action {
+    pub fn possible_recharge_action(_state: &State) -> Action {
         Action::new("recharge".to_string(), 0, HashMap::new())
     }
 

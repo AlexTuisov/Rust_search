@@ -292,21 +292,18 @@ impl Problem for DeliveryProblem {
     fn get_possible_actions(&self, state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
 
-        // Move actions
+        // Move actions - Only generate if the bot is not already in the target room
         for bot in &state.bots {
             if let Some(connected_rooms) = self.room_connections.get(&format!("room{}", bot.location)) {
                 for &next_room in connected_rooms {
-                    actions.push(Self::possible_move_action(
-                        bot.index,
-                        bot.location,
-                        next_room,
-                    ));
+                    if bot.location != next_room {
+                        actions.push(Self::possible_move_action(bot.index, bot.location, next_room));
+                    }
                 }
             }
         }
 
-
-        // Pick actions - only for items in rooms (not in arms or trays)
+        // Pick actions - Only for items in the same room as the bot, not in arms or trays
         for bot in &state.bots {
             for item in &state.items {
                 if bot.location == item.location && item.in_arm == -1 && item.in_tray == -1 {
@@ -327,7 +324,7 @@ impl Problem for DeliveryProblem {
             }
         }
 
-        // Drop actions - only for items in arms
+        // Drop actions - Only for items currently in arms
         for bot in &state.bots {
             for arm in &bot.arms {
                 if !arm.is_free {
@@ -336,17 +333,20 @@ impl Problem for DeliveryProblem {
                         .iter()
                         .find(|item| item.in_arm == arm.side)
                         .unwrap();
-                    actions.push(Self::possible_drop_action(
-                        item.index,
-                        bot.location,
-                        arm.side,
-                        bot.index,
-                    ));
+                    // Only drop if the item is not already in the room
+                    if item.location != bot.location {
+                        actions.push(Self::possible_drop_action(
+                            item.index,
+                            bot.location,
+                            arm.side,
+                            bot.index,
+                        ));
+                    }
                 }
             }
         }
 
-        // To-tray actions - from arm to tray
+        // To-tray actions - Only for items in arms, not already in the tray
         for bot in &state.bots {
             for arm in &bot.arms {
                 if !arm.is_free {
@@ -355,21 +355,27 @@ impl Problem for DeliveryProblem {
                         .iter()
                         .find(|item| item.in_arm == arm.side)
                         .unwrap();
-                    actions.push(Self::possible_to_tray_action(
-                        item.index, arm.side, bot.index,
-                    ));
+                    if item.in_tray == -1 {
+                        actions.push(Self::possible_to_tray_action(
+                            item.index,
+                            arm.side,
+                            bot.index,
+                        ));
+                    }
                 }
             }
         }
 
-        // From-tray actions - from tray to free arm
+        // From-tray actions - Only for items in the tray, and if there is a free arm
         for bot in &state.bots {
             for item in &state.items {
                 if item.in_tray == bot.index {
                     for arm in &bot.arms {
                         if arm.is_free {
                             actions.push(Self::possible_from_tray_action(
-                                item.index, arm.side, bot.index,
+                                item.index,
+                                arm.side,
+                                bot.index,
                             ));
                         }
                     }
