@@ -1,0 +1,78 @@
+{
+    "state": {
+      "places": {
+        "location1": {
+          "id": "location1",
+          "available_resources": {
+            "wood": 2,
+            "timber": 3,
+            "ore": 0,
+            "stone": 2,
+            "iron": 0,
+            "coal": 0
+          },
+          "carts": 1,
+          "housing": 0,
+          "has_cabin": true,
+          "has_coal_stack": true,
+          "has_quarry": false,
+          "has_mine": false,
+          "has_sawmill": true,
+          "has_ironworks": false,
+          "has_docks": false,
+          "has_wharf": false,
+          "is_woodland": true,
+          "is_mountain": false,
+          "is_metalliferous": false,
+          "is_by_coast": false
+        },
+        "location2": {
+          "id": "location2",
+          "available_resources": {
+            "wood": 0,
+            "timber": 0,
+            "ore": 2,
+            "stone": 0,
+            "iron": 0,
+            "coal": 2
+          },
+          "carts": 0,
+          "housing": 0,
+          "has_cabin": false,
+          "has_coal_stack": false,
+          "has_quarry": false,
+          "has_mine": true,
+          "has_sawmill": false,
+          "has_ironworks": true,
+          "has_docks": false,
+          "has_wharf": false,
+          "is_woodland": false,
+          "is_mountain": false,
+          "is_metalliferous": true,
+          "is_by_coast": true
+        }
+      },
+      "vehicles": {},
+      "labour": 0,
+      "resource_use": 0,
+      "pollution": 0,
+      "connections_by_rail": {}
+    },
+    "problem": {
+      "goal": {
+        "conditions": [
+          {
+            "predicate": "connected-by-rail",
+            "from": "location1",
+            "to": "location2"
+          }
+        ]
+      },
+      "connections_by_land": {
+        "location1": ["location2"],
+        "location2": ["location1"]
+      },
+      "connections_by_sea": {}
+    }
+  }
+  

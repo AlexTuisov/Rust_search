@@ -35,6 +35,15 @@ impl ExpeditionProblem {
         Action::new(format!("move_forwards_{}_{}_{}", sled_id, from, to), 1, parameters)
     }
 
+    pub fn possible_move_backwards_action(&self, sled_id: &str, from: &str, to: &str) -> Action {
+        let mut parameters = HashMap::new();
+        parameters.insert("sled".to_string(), Value::Text(sled_id.to_string()));
+        parameters.insert("from".to_string(), Value::Text(from.to_string()));
+        parameters.insert("to".to_string(), Value::Text(to.to_string()));
+        Action::new(
+            format!("move_backwards_{}_{}_{}", sled_id, from, to),1,parameters)
+    }
+
     pub fn possible_store_supplies_action(&self, sled_id: &str, waypoint: &str) -> Action {
         let mut parameters = HashMap::new();
         parameters.insert("sled".to_string(), Value::Text(sled_id.to_string()));
@@ -50,6 +59,24 @@ impl ExpeditionProblem {
     }
 
     pub fn apply_move_forwards(&self, state: &State, action: &Action) -> State {
+        let mut new_state = state.clone();
+        let sled_id = match action.parameters.get("sled").unwrap() {
+            Value::Text(id) => id,
+            _ => panic!("Expected string value for sled"),
+        };
+        let to = match action.parameters.get("to").unwrap() {
+            Value::Text(val) => val,
+            _ => panic!("Expected string value for destination"),
+        };
+
+        if let Some(sled) = new_state.sleds.get_mut(sled_id) {
+            sled.location = to.clone();
+            sled.supplies -= 1;
+        }
+        new_state
+    }
+
+    pub fn apply_move_backwards(&self, state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
         let sled_id = match action.parameters.get("sled").unwrap() {
             Value::Text(id) => id,
@@ -133,6 +160,19 @@ impl Problem for ExpeditionProblem {
                     }
                 }
 
+                // Move backwards actions
+                if sled.supplies >= 1 {
+                    for (prev_waypoint, connections) in &self.waypoint_connections {
+                        if connections.contains(&sled.location) {
+                            actions.push(self.possible_move_backwards_action(
+                                sled_id,
+                                &sled.location,
+                                prev_waypoint,
+                            ));
+                        }
+                    }
+                }
+
                 // Store supplies actions
                 if sled.supplies >= 1 {
                     actions.push(self.possible_store_supplies_action(
@@ -159,12 +199,14 @@ impl Problem for ExpeditionProblem {
     fn apply_action(&self, state: &State, action: &Action) -> State {
         if action.name.starts_with("move_forwards") {
             self.apply_move_forwards(state, action)
+        } else if action.name.starts_with("move_backwards") {
+            self.apply_move_backwards(state, action)
         } else if action.name.starts_with("store_supplies") {
             self.apply_store_supplies(state, action)
         } else if action.name.starts_with("retrieve_supplies") {
             self.apply_retrieve_supplies(state, action)
         } else {
-            panic!("Unknown action");
+            panic!("Unknown action: {}", action.name);
         }
     }
 
@@ -193,7 +235,7 @@ impl Problem for ExpeditionProblem {
         (state, problem)
     }
 
-    fn heuristic(&self, state: &State) -> f64 {
+    fn heuristic(&self, _state: &State) -> f64 {
         0.0 // Simple heuristic can be implemented based on distance to goals
     }
 }
