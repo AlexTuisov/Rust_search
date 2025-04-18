@@ -8,44 +8,45 @@ use serde_json::Value as JsonValue;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Place {
-    pub id: String,
-    pub available_resources: HashMap<String, i32>, // Resource -> Amount
-    pub carts: i32,
-    pub housing: i32,
-    pub has_cabin: bool,
-    pub has_coal_stack: bool,
-    pub has_quarry: bool,
-    pub has_mine: bool,
-    pub has_sawmill: bool,
-    pub has_ironworks: bool,
-    pub has_docks: bool,
-    pub has_wharf: bool,
-    pub is_woodland: bool,
-    pub is_mountain: bool,
-    pub is_metalliferous: bool,
-    pub is_by_coast: bool,
+    pub id: String, // Unique identifier for the place
+    pub available_resources: HashMap<String, i32>, // Resource inventory at this location
+    pub carts: i32, // Number of carts present
+    pub housing: i32, // Number of housing units
+    pub has_cabin: bool, // Whether a cabin has been built
+    pub has_coal_stack: bool, // Whether a coal stack has been built
+    pub has_quarry: bool, // Whether a quarry exists
+    pub has_mine: bool, // Whether a mine exists
+    pub has_sawmill: bool, // Whether a sawmill exists
+    pub has_ironworks: bool, // Whether ironworks have been built
+    pub has_docks: bool, // Whether docks exist
+    pub has_wharf: bool, // Whether a wharf exists
+    pub is_woodland: bool, // True if this place is woodland
+    pub is_mountain: bool, // True if this place is mountainous
+    pub is_metalliferous: bool, // True if this place contains metal ores
+    pub is_by_coast: bool, // True if this place is adjacent to the sea
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Vehicle {
-    pub id: String,
-    pub is_train: bool,
-    pub is_ship: bool,
-    pub space_in: i32,
-    pub available_resources: HashMap<String, i32>, // Resource -> Amount
-    pub location: String, // Place ID
-    pub potential: bool,  // Whether the vehicle is still potential for building
+    pub id: String, // Unique identifier for the vehicle
+    pub is_train: bool, // True if the vehicle is a train
+    pub is_ship: bool, // True if the vehicle is a ship
+    pub space_in: i32, // Remaining capacity in the vehicle
+    pub available_resources: HashMap<String, i32>, // Resources currently carried
+    pub location: String, // Place ID where the vehicle is located
+    pub potential: bool, // True if the vehicle is not yet built
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
-    pub places: HashMap<String, Place>, // Place ID -> Place
-    pub vehicles: HashMap<String, Vehicle>, // Vehicle ID -> Vehicle
-    pub labour: i32,
-    pub resource_use: i32,
-    pub pollution: i32,
-    pub connections_by_rail: HashMap<String, Vec<String>>,
+    pub places: HashMap<String, Place>, // All known places in the world
+    pub vehicles: HashMap<String, Vehicle>, // All vehicles and their current state
+    pub labour: i32, // Total labour expended so far
+    pub resource_use: i32, // Total resource use so far
+    pub pollution: i32, // Pollution level accumulated
+    pub connections_by_rail: HashMap<String, Vec<String>>, // Rail connectivity between places
 }
+
 
 impl StateTrait for State {}
 

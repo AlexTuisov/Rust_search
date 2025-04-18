@@ -7,10 +7,10 @@ use std::fs;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Boat {
-    pub x: OrderedFloat<f64>,
-    pub y: OrderedFloat<f64>,
-    pub v: OrderedFloat<f64>,
-    pub index: i32,
+    pub x: OrderedFloat<f64>, // x-coordinate of the boat
+    pub y: OrderedFloat<f64>, // y-coordinate of the boat
+    pub v: OrderedFloat<f64>, // velocity of the boat
+    pub index: i32, // index of the boat
 }
 
 impl Boat {
@@ -28,8 +28,8 @@ impl Boat {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Person {
     pub d: OrderedFloat<f64>,
-    pub saved: bool,
-    pub index: i32,
+    pub saved: bool, // whether the person is saved or not
+    pub index: i32, 
 }
 
 impl Person {
