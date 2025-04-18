@@ -3,6 +3,7 @@ pub mod compute_number_problem;
 pub mod counters_problem;
 pub mod ext_plant_watering_problem;
 pub mod farm_problem;
+pub mod farmland_problem;
 pub mod fo_counters_problem;
 pub mod fo_sailing_problem;
 pub mod market_trader_problem;
