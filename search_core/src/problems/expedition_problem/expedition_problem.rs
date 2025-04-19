@@ -8,20 +8,20 @@ use std::fs;
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Sled {
     pub location: String,
-    pub supplies: i32,
+    pub supplies: i32, // Amount of supllies on the sled
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
     pub sleds: HashMap<String, Sled>,
-    pub waypoint_supplies: HashMap<String, i32>,
+    pub waypoint_supplies: HashMap<String, i32>, // Supplies in each waypoint
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ExpeditionProblem {
-    goal_locations: HashMap<String, String>,
-    waypoint_connections: HashMap<String, Vec<String>>,
-    sled_capacity: HashMap<String, i32>
+    goal_locations: HashMap<String, String>, // sled => goal waypoint
+    waypoint_connections: HashMap<String, Vec<String>>, // waypoint => connections to other waypoints
+    sled_capacity: HashMap<String, i32> // sled => supply capacity
 }
 
 impl StateTrait for State {}

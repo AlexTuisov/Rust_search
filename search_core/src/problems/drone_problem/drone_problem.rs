@@ -7,20 +7,22 @@ use std::fs;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
-    pub x: i32,
-    pub y: i32,
-    pub z: i32,
-    pub battery_level: i32,
-    pub visited: HashMap<String, bool>,
-    pub locations: HashMap<String, (i32, i32, i32)>,
-    pub bounds: ((i32, i32), (i32, i32), (i32, i32)),
+    pub x: i32, // x coordinate of the drone
+    pub y: i32, // y coordinate of the drone
+    pub z: i32, // z coordinate of the drone
+    pub battery_level: i32, // battery level of the drone
+    pub visited: HashMap<String, bool>, // point => visited or not
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct DroneProblem {
+    pub battery_capacity: i32, // battery capacity of the drone
+    pub bounds: ((i32, i32), (i32, i32), (i32, i32)), // x bounds tuple, y bounds tuple, z bounds tuple
+    pub locations: HashMap<String, (i32, i32, i32)>, // point => (x, y, z)
 }
 
 impl StateTrait for State {}
 
-pub struct DroneProblem {
-    battery_capacity: i32,
-}
 
 impl DroneProblem {
     pub fn possible_increase_x_action(state: &State) -> Action {
@@ -134,26 +136,26 @@ impl Problem for DroneProblem {
         let mut actions = Vec::new();
 
         if state.battery_level >= 1 {
-            if state.x <= state.bounds.0 .1 - 1 {
+            if state.x <= self.bounds.0 .1 - 1 {
                 actions.push(Self::possible_increase_x_action(state));
             }
-            if state.x >= state.bounds.0 .0 + 1 {
+            if state.x >= self.bounds.0 .0 + 1 {
                 actions.push(Self::possible_decrease_x_action(state));
             }
-            if state.y <= state.bounds.1 .1 - 1 {
+            if state.y <= self.bounds.1 .1 - 1 {
                 actions.push(Self::possible_increase_y_action(state));
             }
-            if state.y >= state.bounds.1 .0 + 1 {
+            if state.y >= self.bounds.1 .0 + 1 {
                 actions.push(Self::possible_decrease_y_action(state));
             }
-            if state.z <= state.bounds.2 .1 - 1 {
+            if state.z <= self.bounds.2 .1 - 1 {
                 actions.push(Self::possible_increase_z_action(state));
             }
-            if state.z >= state.bounds.2 .0 + 1 {
+            if state.z >= self.bounds.2 .0 + 1 {
                 actions.push(Self::possible_decrease_z_action(state));
             }
 
-            for (loc_id, &(loc_x, loc_y, loc_z)) in &state.locations {
+            for (loc_id, &(loc_x, loc_y, loc_z)) in &self.locations {
                 if state.x == loc_x && state.y == loc_y && state.z == loc_z {
                     actions.push(Self::possible_visit_action(state, loc_id.clone()));
                 }
@@ -200,15 +202,14 @@ impl Problem for DroneProblem {
         let state_value = json_value
             .get("state")
             .expect("Missing 'state' field in JSON");
+        let problem_value = json_value
+            .get("problem")
+            .expect("Missing 'problem' field in JSON");
 
         let state: State = serde_json::from_value(state_value.clone())
             .expect("Failed to deserialize state");
-
-        let battery_capacity = state_value["battery_capacity"]
-            .as_i64()
-            .unwrap() as i32;
-
-        let problem = DroneProblem { battery_capacity };
+        let problem: DroneProblem = serde_json::from_value(problem_value.clone())
+            .expect("Failed to deserialize problem");
 
         (state, problem)
     }

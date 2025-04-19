@@ -3,7 +3,7 @@ use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use std::collections::HashMap;
-use std::fs; // Add this line
+use std::fs; 
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Arm {
@@ -41,7 +41,7 @@ impl StateTrait for State {}
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DeliveryProblem {
     goal_locations: HashMap<String, i32>, // item_id -> target_room_id
-    room_connections: HashMap<String, Vec<i32>>
+    room_connections: HashMap<String, Vec<i32>> // room_id -> connected_rooms  
 }
 
 impl DeliveryProblem {

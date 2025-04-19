@@ -5,32 +5,34 @@ use serde_json::Value as JsonValue;
 use std::collections::{HashMap, HashSet};
 use std::fs;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Rover {
-    pub id: String,
-    pub location: String, // Waypoint ID
-    pub energy: i32,
-    pub equipped_for_soil_analysis: bool,
-    pub equipped_for_rock_analysis: bool,
-    pub equipped_for_imaging: bool,
-    pub available: bool,
-}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Store {
     pub id: String,
-    pub rover_id: String, // Rover ID this store belongs to
-    pub empty: bool,
-    pub full: bool, // Added to match PDDL's (full ?s - store) predicate
+    pub rover_id: String, // The rover that owns this store
+    pub empty: bool, // when the store has no sample in it
+    pub full: bool, // when the store has a sample in it
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Camera {
     pub id: String,
-    pub rover_id: String,             // Rover ID this camera is on
-    pub calibration_target: String,   // Objective ID
-    pub supported_modes: Vec<String>, // Mode IDs
-    pub calibrated_objective: Option<String>, // New: Which objective this camera is calibrated for
+    pub rover_id: String, // The rover that owns this camera
+    pub calibration_target: String,   // Target Objective ID 
+    pub supported_modes: Vec<String>, // Supported modes for this camera
+    pub calibrated_objective: Option<String>, // The objective that this camera is calibrated to
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Rover {
+    pub id: String,
+    pub location: String,
+    pub energy: i32,
+    pub equipped_for_soil_analysis: bool, // If true then the rover can sample soil 
+    pub equipped_for_rock_analysis: bool, // If true then the rover can sample rock
+    pub equipped_for_imaging: bool, // If true then the rover can take images
+    pub available: bool, 
+    pub store: Store,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -49,6 +51,7 @@ pub struct Objective {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Lander {
+    // Lander is a waypoint that can be communicated with
     pub id: String,
     pub location: String, // Waypoint ID
     pub channel_free: bool,
@@ -57,20 +60,18 @@ pub struct Lander {
 // State contains only dynamic elements that change during search
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct State {
-    pub rovers: HashMap<String, Rover>,
-    pub stores: HashMap<String, Store>,
-    pub cameras: HashMap<String, Camera>,
-    pub waypoints: HashMap<String, Waypoint>,
-    pub landers: HashMap<String, Lander>,
-    pub soil_analysis: HashMap<String, HashSet<String>>, // Rover ID -> Waypoints analyzed
-    pub rock_analysis: HashMap<String, HashSet<String>>, // Rover ID -> Waypoints analyzed
-    pub images: HashMap<String, HashMap<String, HashSet<String>>>, // Rover ID -> Objective ID -> Modes
-    pub communicated_soil_data: HashSet<String>,                   // Waypoint IDs
-    pub communicated_rock_data: HashSet<String>,                   // Waypoint IDs
-    pub communicated_image_data: HashMap<String, HashSet<String>>, // Objective ID -> Modes
-    pub recharges: i32,
+    pub rovers: HashMap<String, Rover>, // Rover ID -> Rover
+    pub cameras: HashMap<String, Camera>, // Camera ID -> Camera
+    pub waypoints: HashMap<String, Waypoint>, // Waypoint ID -> Waypoint
+    pub landers: HashMap<String, Lander>,  // Lander ID -> Lander
+    pub soil_analysis: HashMap<String, HashSet<String>>, // Tracks which rover has analyzed soil at which waypoint
+    pub rock_analysis: HashMap<String, HashSet<String>>, // Tracks which rover has analyzed rock at which waypoint
+    pub images: HashMap<String, HashMap<String, HashSet<String>>>,  // Maps rover -> objective -> set of image modes captured
+    pub communicated_soil_data: HashSet<String>, // Tracks which soil data has been communicated
+    pub communicated_rock_data: HashSet<String>, // Tracks which rock data has been communicated
+    pub communicated_image_data: HashMap<String, HashSet<String>>, // Maps rover -> set of image modes communicated
+    pub recharges: i32,  // Number of recharge actions taken
 }
-
 impl StateTrait for State {}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -359,7 +360,8 @@ impl RoverProblem {
                     .get(waypoint)
                     .map_or(false, |w| w.has_soil_sample)
                 {
-                    for store in state.stores.values() {
+                    for rover in state.rovers.values() {
+                        let store = &rover.store;
                         if store.rover_id == rover.id && store.empty {
                             actions.push(Self::get_sample_soil_action(rover, store, waypoint));
                         }
@@ -377,7 +379,8 @@ impl RoverProblem {
                     .get(waypoint)
                     .map_or(false, |w| w.has_rock_sample)
                 {
-                    for store in state.stores.values() {
+                    for rover in state.rovers.values() {
+                        let store = &rover.store;
                         if store.rover_id == rover.id && store.empty {
                             actions.push(Self::get_sample_rock_action(rover, store, waypoint));
                         }
@@ -388,12 +391,12 @@ impl RoverProblem {
 
         // Drop actions
         for rover in state.rovers.values() {
-            for store in state.stores.values() {
+            let store = &rover.store;
                 if store.rover_id == rover.id && store.full {
                     actions.push(Self::get_drop_action(rover, store));
                 }
             }
-        }
+        
 
         
             // Calibrate actions
@@ -613,10 +616,13 @@ impl RoverProblem {
         };
 
         // Update the store - mark as not empty and full
-        if let Some(store) = new_state.stores.get_mut(store_id) {
-            store.empty = false;
-            store.full = true;
+        if let Some(rover) = new_state.rovers.get_mut(rover_id) {
+            if rover.store.id == *store_id {
+                rover.store.empty = false;
+                rover.store.full = true;
+            }
         }
+        
 
         // Update the waypoint - remove soil sample
         if let Some(waypoint) = new_state.waypoints.get_mut(waypoint_id) {
@@ -657,10 +663,13 @@ impl RoverProblem {
         };
 
         // Update the store - mark as not empty and full
-        if let Some(store) = new_state.stores.get_mut(store_id) {
-            store.empty = false;
-            store.full = true;
+        if let Some(rover) = new_state.rovers.get_mut(rover_id) {
+            if rover.store.id == *store_id {
+                rover.store.empty = false;
+                rover.store.full = true;
+            }
         }
+        
 
         // Update the waypoint - remove rock sample
         if let Some(waypoint) = new_state.waypoints.get_mut(waypoint_id) {
@@ -690,10 +699,18 @@ impl RoverProblem {
             _ => panic!("Invalid store ID in action"),
         };
 
-        if let Some(store) = new_state.stores.get_mut(store_id) {
-            store.empty = true;
-            store.full = false;
+        let rover_id = match action.parameters.get("rover") {
+            Some(Value::Text(id)) => id,
+            _ => panic!("Invalid rover ID in action"),
+        };
+
+        if let Some(rover) = new_state.rovers.get_mut(rover_id) {
+            if rover.store.id == *store_id {
+                rover.store.empty = true;
+                rover.store.full = false;
+            }
         }
+        
 
         new_state
     }
@@ -855,30 +872,6 @@ impl RoverProblem {
         new_state
     }
 
-    pub fn load_state_from_json(json_path: &str) -> (State, RoverProblem) {
-        // Read the JSON file into a string
-        let json_str = fs::read_to_string(json_path).expect("Failed to read JSON file");
-    
-        // Parse the JSON string into a serde_json::Value
-        let json_value: JsonValue = serde_json::from_str(&json_str).expect("Failed to parse JSON");
-    
-        // Extract the "state" and "problem" fields
-        let state_value = json_value
-            .get("state")
-            .expect("Missing 'state' field in JSON");
-        let problem_value = json_value
-            .get("problem")
-            .expect("Missing 'problem' field in JSON");
-    
-        // Deserialize each part into the corresponding struct
-        let state: State = serde_json::from_value(state_value.clone())
-            .expect("Failed to deserialize state");
-        
-        let problem: RoverProblem = serde_json::from_value(problem_value.clone())
-            .expect("Failed to deserialize problem");
-    
-        (state, problem)
-    }
     
 }
 
@@ -924,6 +917,27 @@ impl Problem for RoverProblem {
     }
 
     fn load_state_from_json(json_path: &str) -> (State, RoverProblem) {
-        Self::load_state_from_json(json_path)
+        // Read the JSON file into a string
+        let json_str = fs::read_to_string(json_path).expect("Failed to read JSON file");
+    
+        // Parse the JSON string into a serde_json::Value
+        let json_value: JsonValue = serde_json::from_str(&json_str).expect("Failed to parse JSON");
+    
+        // Extract the "state" and "problem" fields
+        let state_value = json_value
+            .get("state")
+            .expect("Missing 'state' field in JSON");
+        let problem_value = json_value
+            .get("problem")
+            .expect("Missing 'problem' field in JSON");
+    
+        // Deserialize each part into the corresponding struct
+        let state: State = serde_json::from_value(state_value.clone())
+            .expect("Failed to deserialize state");
+        
+        let problem: RoverProblem = serde_json::from_value(problem_value.clone())
+            .expect("Failed to deserialize problem");
+    
+        (state, problem)
     }
 }

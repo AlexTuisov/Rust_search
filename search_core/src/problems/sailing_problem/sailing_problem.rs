@@ -9,15 +9,15 @@ use std::fs;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Boat {
-    pub x: OrderedFloat<f64>,
-    pub y: OrderedFloat<f64>,
-    pub index: i32,
+    pub x: OrderedFloat<f64>, // x-coordinate
+    pub y: OrderedFloat<f64>, // y-coordinate
+    pub index: i32, // index of the boat
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Person {
-    pub d: OrderedFloat<f64>,
-    pub saved: bool,
+    pub d: OrderedFloat<f64>, 
+    pub saved: bool, 
     pub index: i32,
 }
 
@@ -192,7 +192,7 @@ impl SailingProblem {
     }
 
     fn apply_save_person(state: &State, action: &Action) -> State {
-        let boat_index = match action.parameters.get("boat").unwrap() {
+        let _boat_index = match action.parameters.get("boat").unwrap() {
             Value::Int(index) => *index,
             _ => panic!("Expected boat index to be an integer"),
         };

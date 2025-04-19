@@ -8,15 +8,13 @@
           "equipped_for_soil_analysis": true,
           "equipped_for_rock_analysis": true,
           "equipped_for_imaging": true,
-          "available": true
-        }
-      },
-      "stores": {
-        "store0": {
-          "id": "store0",
-          "rover_id": "rover0",
-          "empty": true,
-          "full": false
+          "available": true,
+          "store": {
+            "id": "store0",
+            "rover_id": "rover0",
+            "empty": true,
+            "full": false
+          }
         }
       },
       "cameras": {
