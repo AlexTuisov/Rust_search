@@ -183,6 +183,9 @@ impl ExtPlantWateringProblem {
         Action::new(action_name, 1, parameters)
     }
 
+    /// Generates all valid actions for all robots based on the state.
+    /// Each block below documents the specific condition for that type of movement or action.
+    /// This includes directional moves, water loading, and water pouring.
     pub fn get_actions(&self, state: &State) -> Vec<Action> {
         let mut actions = Vec::new();
         for robot in &state.robots {
@@ -233,7 +236,7 @@ impl ExtPlantWateringProblem {
         }
         actions
     }
-
+    /// Applies an action that moves the robot up by 1 unit.
     pub fn apply_move_up_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
         let robot_index = match action.parameters.get("index") {
@@ -249,6 +252,7 @@ impl ExtPlantWateringProblem {
 
         new_state
     }
+    /// Applies an action that moves the robot down by 1 unit.
     pub fn apply_move_down_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
         let robot_index = match action.parameters.get("index") {
@@ -264,6 +268,7 @@ impl ExtPlantWateringProblem {
 
         new_state
     }
+    /// Applies an action that moves the robot left by 1 unit.
     pub fn apply_move_left_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
         let robot_index = match action.parameters.get("index") {
@@ -279,6 +284,7 @@ impl ExtPlantWateringProblem {
 
         new_state
     }
+    /// Applies an action that moves the robot right by 1 unit.
     pub fn apply_move_right_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
         let robot_index = match action.parameters.get("index") {
@@ -294,6 +300,8 @@ impl ExtPlantWateringProblem {
 
         new_state
     }
+
+    /// Applies an action that moves the robot diagonally up and left.
     pub fn apply_move_up_left_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
         let robot_index = match action.parameters.get("index") {
@@ -310,6 +318,7 @@ impl ExtPlantWateringProblem {
 
         new_state
     }
+    /// Applies an action that moves the robot diagonally up and right.
     pub fn apply_move_up_right_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
         let robot_index = match action.parameters.get("index") {
@@ -326,6 +335,7 @@ impl ExtPlantWateringProblem {
 
         new_state
     }
+    /// Applies an action that moves the robot diagonally down and left.
     pub fn apply_move_down_left_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
         let robot_index = match action.parameters.get("index") {
@@ -342,6 +352,7 @@ impl ExtPlantWateringProblem {
 
         new_state
     }
+    /// Applies an action that moves the robot diagonally down and right.
     pub fn apply_move_down_right_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
         let robot_index = match action.parameters.get("index") {
@@ -358,6 +369,7 @@ impl ExtPlantWateringProblem {
 
         new_state
     }
+    /// Applies an action where the robot loads water from the tap.
     pub fn apply_load_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
         let robot_index = match action.parameters.get("index") {
@@ -375,6 +387,7 @@ impl ExtPlantWateringProblem {
 
         new_state
     }
+    /// Applies an action where the robot pours water into a specific plant.
     pub fn apply_pour_action(state: &State, action: &Action) -> State {
         let mut new_state = state.clone();
         let robot_index = match action.parameters.get("robot_index") {
@@ -407,9 +420,11 @@ impl ExtPlantWateringProblem {
 
 impl Problem for ExtPlantWateringProblem {
     type State = State;
+    /// Returns all possible actions from the current state.
     fn get_possible_actions(&self, state: &State) -> Vec<Action> {
         self.get_actions(state)
     }
+    /// Applies a named action to the state, dispatching to the correct handler.
     fn apply_action(&self, state: &State, action: &Action) -> State {
         if let Some((_, pure_action)) = action.name.split_once('_') {
             if pure_action.starts_with("poured_water_to_plant") {
@@ -435,7 +450,7 @@ impl Problem for ExtPlantWateringProblem {
             );
         }
     }
-
+    /// Checks if the current state satisfies the goal.
     fn is_goal_state(&self, state: &State) -> bool {
         self.goal.is_goal_state(state)
     }
