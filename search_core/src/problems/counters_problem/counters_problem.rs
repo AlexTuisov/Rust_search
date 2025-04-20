@@ -38,9 +38,9 @@ impl LinearExpr {
 /// Represents a numeric condition between two linear expressions.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Condition {
-    pub left: LinearExpr,      // Left-hand side of the comparison
-    pub operator: String,      // One of: "=", "<", "<=", ">", ">="
-    pub right: LinearExpr,     // Right-hand side of the comparison
+    pub left: LinearExpr,  // Left-hand side of the comparison
+    pub operator: String,  // One of: "=", "<", "<=", ">", ">="
+    pub right: LinearExpr, // Right-hand side of the comparison
 }
 
 impl Condition {
@@ -75,8 +75,8 @@ impl Goal {
 /// A single numeric counter.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Counter {
-    pub value: i32,       // Current integer value of the counter
-    pub name: String,     // Unique identifier for the counter
+    pub value: i32,   // Current integer value of the counter
+    pub name: String, // Unique identifier for the counter
 }
 
 impl Counter {
@@ -89,8 +89,8 @@ impl Counter {
 /// Describes the entire problem instance for the counter domain.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CountersProblem {
-    pub max_value: i32,  // Maximum allowed value for any counter
-    pub goal: Goal,      // Goal conditions to be satisfied
+    pub max_value: i32, // Maximum allowed value for any counter
+    pub goal: Goal,     // Goal conditions to be satisfied
 }
 
 impl CountersProblem {

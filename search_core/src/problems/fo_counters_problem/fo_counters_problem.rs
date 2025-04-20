@@ -129,7 +129,10 @@ impl FoCountersProblem {
     pub fn get_increase_rate_action(counter: &Counter) -> Action {
         let mut parameters = std::collections::HashMap::new();
         let action_name = format!("rateI_counter{}", counter.name);
-        parameters.insert("increase_rate".to_string(), Value::Text("increase_rate".to_string()));
+        parameters.insert(
+            "increase_rate".to_string(),
+            Value::Text("increase_rate".to_string()),
+        );
         parameters.insert("counter".to_string(), Value::Text(counter.name.clone()));
         Action::new(action_name, 1, parameters)
     }
@@ -138,7 +141,10 @@ impl FoCountersProblem {
     pub fn get_decrease_rate_action(counter: &Counter) -> Action {
         let mut parameters = std::collections::HashMap::new();
         let action_name = format!("rateD_counter{}", counter.name);
-        parameters.insert("decrease_rate".to_string(), Value::Text("decrease_rate".to_string()));
+        parameters.insert(
+            "decrease_rate".to_string(),
+            Value::Text("decrease_rate".to_string()),
+        );
         parameters.insert("counter".to_string(), Value::Text(counter.name.clone()));
         Action::new(action_name, 1, parameters)
     }
@@ -174,7 +180,11 @@ impl FoCountersProblem {
             _ => panic!("Missing or invalid 'counter' parameter"),
         };
 
-        if let Some(counter) = new_state.counters.iter_mut().find(|v| v.name == *counter_name) {
+        if let Some(counter) = new_state
+            .counters
+            .iter_mut()
+            .find(|v| v.name == *counter_name)
+        {
             counter.value += counter.rate_value;
         } else {
             panic!("Counter with name {} not found", counter_name);
@@ -191,7 +201,11 @@ impl FoCountersProblem {
             _ => panic!("Missing or invalid 'counter' parameter"),
         };
 
-        if let Some(counter) = new_state.counters.iter_mut().find(|v| v.name == *counter_name) {
+        if let Some(counter) = new_state
+            .counters
+            .iter_mut()
+            .find(|v| v.name == *counter_name)
+        {
             counter.value -= counter.rate_value;
         } else {
             panic!("Counter with name {} not found", counter_name);
@@ -208,7 +222,11 @@ impl FoCountersProblem {
             _ => panic!("Missing or invalid 'counter' parameter"),
         };
 
-        if let Some(counter) = new_state.counters.iter_mut().find(|v| v.name == *counter_name) {
+        if let Some(counter) = new_state
+            .counters
+            .iter_mut()
+            .find(|v| v.name == *counter_name)
+        {
             counter.rate_value -= 1;
         } else {
             panic!("Counter with name {} not found", counter_name);
@@ -225,7 +243,11 @@ impl FoCountersProblem {
             _ => panic!("Missing or invalid 'counter' parameter"),
         };
 
-        if let Some(counter) = new_state.counters.iter_mut().find(|v| v.name == *counter_name) {
+        if let Some(counter) = new_state
+            .counters
+            .iter_mut()
+            .find(|v| v.name == *counter_name)
+        {
             counter.rate_value += 1;
         } else {
             panic!("Counter with name {} not found", counter_name);
@@ -275,13 +297,17 @@ impl Problem for FoCountersProblem {
         let json_str = fs::read_to_string(json_path).expect("Failed to read JSON file");
         let json_value: JsonValue = serde_json::from_str(&json_str).expect("Failed to parse JSON");
 
-        let state_value = json_value.get("state").expect("Missing 'state' field in JSON");
-        let problem_value = json_value.get("problem").expect("Missing 'problem' field in JSON");
+        let state_value = json_value
+            .get("state")
+            .expect("Missing 'state' field in JSON");
+        let problem_value = json_value
+            .get("problem")
+            .expect("Missing 'problem' field in JSON");
 
-        let state: State = serde_json::from_value(state_value.clone())
-            .expect("Failed to deserialize state");
-        let problem: FoCountersProblem = serde_json::from_value(problem_value.clone())
-            .expect("Failed to deserialize problem");
+        let state: State =
+            serde_json::from_value(state_value.clone()).expect("Failed to deserialize state");
+        let problem: FoCountersProblem =
+            serde_json::from_value(problem_value.clone()).expect("Failed to deserialize problem");
 
         (state, problem)
     }

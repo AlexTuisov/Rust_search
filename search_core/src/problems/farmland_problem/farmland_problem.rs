@@ -55,8 +55,8 @@ impl Goal {
         match self.operator.as_str() {
             ">=" => sum >= self.value as f64,
             "<=" => sum <= self.value as f64,
-            ">"  => sum > self.value as f64,
-            "<"  => sum < self.value as f64,
+            ">" => sum > self.value as f64,
+            "<" => sum < self.value as f64,
             "==" | "=" => (sum - self.value as f64).abs() < 1e-6,
             _ => panic!("Unsupported operator in goal: {}", self.operator),
         }

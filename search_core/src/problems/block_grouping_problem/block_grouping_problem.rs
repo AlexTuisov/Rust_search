@@ -16,10 +16,10 @@ impl StateTrait for State {}
 /// A single block on the grid.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Block {
-    pub index: i32,        // Unique identifier for the block
-    pub color_group: i32,  // Group/color index this block belongs to (used for grouping constraints)
-    pub x: i32,            // X-coordinate of the block on the grid
-    pub y: i32,            // Y-coordinate of the block on the grid
+    pub index: i32,       // Unique identifier for the block
+    pub color_group: i32, // Group/color index this block belongs to (used for grouping constraints)
+    pub x: i32,           // X-coordinate of the block on the grid
+    pub y: i32,           // Y-coordinate of the block on the grid
 }
 
 /// Grid boundaries defining where blocks are allowed to move.
@@ -209,7 +209,6 @@ impl Problem for BlockGroupingProblem {
     }
 
     fn load_state_from_json(json_path: &str) -> (State, BlockGroupingProblem) {
-
         // Read the JSON file into a string.
         let json_str = fs::read_to_string(json_path).expect("Failed to read JSON file");
 

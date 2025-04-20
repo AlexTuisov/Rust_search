@@ -403,27 +403,31 @@ impl Problem for RedCarProblem {
         // Now fill the grid.cells with the vehicles.
         // For each horizontal car:
         for car in &state.horizontalcars {
-            for pos in car.get_positions() {
-                state.grid.cells.insert(pos, car.name.clone());
-            }
+            state
+                .grid
+                .place_object(car.name.clone(), &car.get_positions())
+                .expect("failed to place car on grid");
         }
         // For vertical cars:
         for car in &state.verticalcars {
-            for pos in car.get_positions() {
-                state.grid.cells.insert(pos, car.name.clone());
-            }
+            state
+                .grid
+                .place_object(car.name.clone(), &car.get_positions())
+                .expect("failed to place car on grid");
         }
         // For horizontal trucks:
         for truck in &state.horizontaltrucks {
-            for pos in truck.get_positions() {
-                state.grid.cells.insert(pos, truck.name.clone());
-            }
+            state
+                .grid
+                .place_object(truck.name.clone(), &truck.get_positions())
+                .expect("failed to place car on grid");
         }
         // For vertical trucks:
         for truck in &state.verticaltrucks {
-            for pos in truck.get_positions() {
-                state.grid.cells.insert(pos, truck.name.clone());
-            }
+            state
+                .grid
+                .place_object(truck.name.clone(), &truck.get_positions())
+                .expect("failed to place car on grid");
         }
 
         (state, RedCarProblem {})

@@ -7,36 +7,19 @@
         },
         "horizontalcars": [
             {
-                "x": 1,
-                "y": 2,
-                "name": "red-car"
+                "name": "red-car",
+                "x": 0,
+                "y": 2
             }
         ],
         "verticalcars": [
             {
-                "x": 0,
-                "y": 0,
-                "name": "green-car"
-            },
-            {
+                "name": "green-car",
                 "x": 2,
-                "y": 0,
-                "name": "orange-car"
+                "y": 2
             }
         ],
-        "horizontaltrucks": [
-            {
-                "x": 3,
-                "y": 1,
-                "name": "yellow-truck"
-            }
-        ],
-        "verticaltrucks": [
-            {
-                "x": 0,
-                "y": 2,
-                "name": "purple-truck"
-            }
-        ]
+        "horizontaltrucks": [],
+        "verticaltrucks": []
     }
 }

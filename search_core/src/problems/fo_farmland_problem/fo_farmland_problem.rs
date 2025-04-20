@@ -64,8 +64,8 @@ impl Goal {
         match self.operator.as_str() {
             ">=" => adjusted_sum >= self.value as f64,
             "<=" => adjusted_sum <= self.value as f64,
-            ">"  => adjusted_sum >  self.value as f64,
-            "<"  => adjusted_sum <  self.value as f64,
+            ">" => adjusted_sum > self.value as f64,
+            "<" => adjusted_sum < self.value as f64,
             "==" | "=" => (adjusted_sum - self.value as f64).abs() < 1e-6,
             _ => panic!("Unsupported operator in goal: {}", self.operator),
         }
@@ -158,9 +158,15 @@ impl FoFarmLandProblem {
             _ => panic!("Action missing 'to' farm name."),
         };
 
-        let from_index = new_state.farms.iter().position(|v| v.name == *farm_from_name)
+        let from_index = new_state
+            .farms
+            .iter()
+            .position(|v| v.name == *farm_from_name)
             .expect(&format!("Farm {} not found", farm_from_name));
-        let to_index = new_state.farms.iter().position(|v| v.name == *farm_to_name)
+        let to_index = new_state
+            .farms
+            .iter()
+            .position(|v| v.name == *farm_to_name)
             .expect(&format!("Farm {} not found", farm_to_name));
 
         new_state.farms[from_index].value -= 1;
@@ -188,9 +194,15 @@ impl FoFarmLandProblem {
             _ => panic!("Missing car count in action parameters."),
         };
 
-        let from_index = new_state.farms.iter().position(|v| v.name == *farm_from_name)
+        let from_index = new_state
+            .farms
+            .iter()
+            .position(|v| v.name == *farm_from_name)
             .expect(&format!("Farm {} not found", farm_from_name));
-        let to_index = new_state.farms.iter().position(|v| v.name == *farm_to_name)
+        let to_index = new_state
+            .farms
+            .iter()
+            .position(|v| v.name == *farm_to_name)
             .expect(&format!("Farm {} not found", farm_to_name));
 
         // Move 4 * cars units, update cost
@@ -250,8 +262,12 @@ impl Problem for FoFarmLandProblem {
         let json_str = fs::read_to_string(json_path).expect("Failed to read JSON file");
         let json_value: JsonValue = serde_json::from_str(&json_str).expect("Failed to parse JSON");
 
-        let state_value = json_value.get("state").expect("Missing 'state' field in JSON");
-        let problem_value = json_value.get("problem").expect("Missing 'problem' field in JSON");
+        let state_value = json_value
+            .get("state")
+            .expect("Missing 'state' field in JSON");
+        let problem_value = json_value
+            .get("problem")
+            .expect("Missing 'problem' field in JSON");
 
         let state: State =
             serde_json::from_value(state_value.clone()).expect("Failed to deserialize state");

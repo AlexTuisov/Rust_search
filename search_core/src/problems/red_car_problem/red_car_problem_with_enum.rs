@@ -50,10 +50,18 @@ impl Vehicle {
             Vehicle::HorizontalCar(car) => vec![(car.x, car.y), (car.x + 1, car.y)],
             Vehicle::VerticalCar(car) => vec![(car.x, car.y), (car.x, car.y + 1)],
             Vehicle::HorizontalTruck(truck) => {
-                vec![(truck.x, truck.y), (truck.x + 1, truck.y), (truck.x + 2, truck.y)]
+                vec![
+                    (truck.x, truck.y),
+                    (truck.x + 1, truck.y),
+                    (truck.x + 2, truck.y),
+                ]
             }
             Vehicle::VerticalTruck(truck) => {
-                vec![(truck.x, truck.y), (truck.x, truck.y + 1), (truck.x, truck.y + 2)]
+                vec![
+                    (truck.x, truck.y),
+                    (truck.x, truck.y + 1),
+                    (truck.x, truck.y + 2),
+                ]
             }
         }
     }
@@ -79,7 +87,8 @@ impl Vehicle {
             Vehicle::HorizontalTruck(truck) => match direction {
                 "right" => {
                     let end_position = truck.x + 3;
-                    end_position < grid.col_size && !grid.cells.contains_key(&(end_position, truck.y))
+                    end_position < grid.col_size
+                        && !grid.cells.contains_key(&(end_position, truck.y))
                 }
                 "left" => truck.x > 0 && !grid.cells.contains_key(&(truck.x - 1, truck.y)),
                 _ => false,
@@ -87,7 +96,8 @@ impl Vehicle {
             Vehicle::VerticalTruck(truck) => match direction {
                 "up" => {
                     let end_position = truck.y + 3;
-                    end_position < grid.row_size && !grid.cells.contains_key(&(truck.x, end_position))
+                    end_position < grid.row_size
+                        && !grid.cells.contains_key(&(truck.x, end_position))
                 }
                 "down" => truck.y > 0 && !grid.cells.contains_key(&(truck.x, truck.y - 1)),
                 _ => false,
@@ -251,7 +261,9 @@ impl Problem for RedCarProblem {
                 let old_positions = vehicle.get_positions();
                 vehicle.apply_action(move_direction);
                 let new_positions = vehicle.get_positions();
-                new_state.grid.update(old_positions, new_positions, vehicle_name);
+                new_state
+                    .grid
+                    .update(old_positions, new_positions, vehicle_name);
                 break;
             }
         }
@@ -278,8 +290,7 @@ impl Problem for RedCarProblem {
     fn load_state_from_json(json_path: &str) -> (State, RedCarProblem) {
         // Read the legacy JSON.
         let json_str = fs::read_to_string(json_path).expect("Failed to read JSON file");
-        let json_value: JsonValue =
-            serde_json::from_str(&json_str).expect("Failed to parse JSON");
+        let json_value: JsonValue = serde_json::from_str(&json_str).expect("Failed to parse JSON");
 
         let legacy_state_value = json_value.get("state").expect("Missing 'state' field");
         let legacy_state: LegacyState = serde_json::from_value(legacy_state_value.clone())
@@ -307,9 +318,10 @@ impl Problem for RedCarProblem {
 
         // Place each vehicle on the grid.
         for vehicle in &state.vehicles {
-            let _ = state
+            state
                 .grid
-                .place_object(vehicle.get_name().to_string(), &vehicle.get_positions());
+                .place_object(vehicle.get_name().to_string(), &vehicle.get_positions())
+                .expect("failed to place car on grid");
         }
 
         (state, RedCarProblem {})
