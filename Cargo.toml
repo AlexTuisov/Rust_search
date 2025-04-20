@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "search_core",
-    "rust_search_module"
+    "rust_search_module/app",
 ]
 
 resolver = "2"

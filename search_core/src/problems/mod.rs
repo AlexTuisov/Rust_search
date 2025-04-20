@@ -15,3 +15,4 @@ pub mod red_car_problem;
 pub mod tpp_problem;
 pub mod zenotravel_fuel_problem;
 pub mod zenotravel_problem;
+pub mod zenotravel_time_problem;

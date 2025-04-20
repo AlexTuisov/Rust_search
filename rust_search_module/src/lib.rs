@@ -28,9 +28,9 @@ fn solve_problem_py(json_path: &str, search_strategy: &str, problem_type: &str) 
     Ok(())
 }
 
-#[pymodule]
-fn rust_search_module(_py: Python, m: &PyModule) -> PyResult<()> {
-    // Expose the `solve_problem_py` function under the name `solve_problem` in Python
-    m.add_function(wrap_pyfunction!(solve_problem_py, m)?)?;
-    Ok(())
-}
+// #[pymodule]
+// fn rust_search_module(_py: Python, m: &PyModule) -> PyResult<()> {
+//     // Expose the `solve_problem_py` function under the name `solve_problem` in Python
+//     m.add_function(wrap_pyfunction!(solve_problem_py, m)?)?;
+//     Ok(())
+// }
