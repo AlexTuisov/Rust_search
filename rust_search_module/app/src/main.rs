@@ -12,14 +12,15 @@
 //use search_core::problems::red_car_problem::red_car_problem::RedCarProblem;
 //use search_core::problems::zenotravel_problem::zenotravel_problem::ZenoTravelProblem;
 use search_core::problems::tpp_problem::tpp_problem::TppProblem;
+use search_core::problems::zenotravel_fuel_problem::zenotravel_fuel_problem::ZenoTravelFuelProblem;
 use search_core::search::solve::solve_problem;
 use std::time;
 use time::Instant;
 
 fn main() {
     let start_time = Instant::now();
-    solve_problem::<TppProblem>(
-        "search_core/src/inputs/example_inputs/tpp_problem/problems_json/pfile1.json",
+    solve_problem::<ZenoTravelFuelProblem>(
+        "search_core/src/inputs/zenotravel_fuel/problems_json/pfile1.json",
         "A*",
     );
 
