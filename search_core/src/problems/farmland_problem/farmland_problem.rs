@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::fs;
 
 /// Represents the current world state with all farm values.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct State {
     farms: Vec<Farm>,
 }
@@ -16,7 +16,7 @@ impl State {}
 impl StateTrait for State {}
 
 /// A farm with a name and a numeric value.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Farm {
     name: String,
     value: i32,

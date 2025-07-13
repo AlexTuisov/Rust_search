@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use std::fs;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Boat {
     pub x: OrderedFloat<f64>, // x-coordinate of the boat
     pub y: OrderedFloat<f64>, // y-coordinate of the boat
@@ -25,7 +25,7 @@ impl Boat {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Person {
     pub d: OrderedFloat<f64>,
     pub saved: bool, // whether the person is saved or not
@@ -43,7 +43,7 @@ impl Person {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct State {
     pub boats: Vec<Boat>,
     pub persons: Vec<Person>,

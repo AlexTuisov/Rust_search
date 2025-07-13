@@ -11,7 +11,7 @@ use std::fs;
 /// - A list of farms, each with a value.
 /// - A number of available cars.
 /// - A total cost value.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct State {
     farms: Vec<Farm>,
     number_of_cars: i32,
@@ -22,7 +22,7 @@ impl State {}
 impl StateTrait for State {}
 
 /// Represents a single farm, identified by name and a numeric value.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Farm {
     name: String,
     value: i32,

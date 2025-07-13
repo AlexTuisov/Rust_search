@@ -6,7 +6,7 @@ use std::fs;
 
 /// Represents the full state of the problem.
 /// Contains all blocks on the grid and their properties.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct State {
     pub blocks: Vec<Block>, // List of all blocks in the current state
 }
@@ -14,7 +14,7 @@ impl State {}
 impl StateTrait for State {}
 
 /// A single block on the grid.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Block {
     pub index: i32,       // Unique identifier for the block
     pub color_group: i32, // Group/color index this block belongs to (used for grouping constraints)

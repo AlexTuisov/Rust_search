@@ -9,7 +9,7 @@ use std::io::BufReader;
 
 include!("refined_heuristic.in");
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct State {
     pub bought: BTreeMap<String, i64>,     // Item bought count per type
     pub camels: Vec<String>,               // List of camel identifiers
@@ -66,7 +66,7 @@ impl State {
 
 impl StateTrait for State {}
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Resources {
     pub capacity: i64,         // Total capacity of the trader
     pub cash_scaled: i64,      // Available cash (scaled if necessary for decimals)

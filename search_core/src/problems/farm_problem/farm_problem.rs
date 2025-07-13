@@ -6,7 +6,7 @@ use std::collections::{BTreeMap, HashMap};
 
 include!("refined_heuristic.in");
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct State {
     pub x_values: BTreeMap<String, i32>, // Maps farms to their x values
     pub adjacencies: BTreeMap<String, Vec<String>>, // Maps farms to their neighbors
@@ -34,7 +34,7 @@ impl State {}
 
 impl StateTrait for State {}
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct WeightedSumGoal {
     pub weights: BTreeMap<String, i64>, // Scaled weights for hashing
     pub threshold: i64,                 // Scaled threshold for hashing

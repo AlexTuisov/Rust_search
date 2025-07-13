@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use std::fs;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct State {
     pub counters: Vec<Counter>, // List of all counters and their current values
 }
@@ -14,7 +14,7 @@ impl StateTrait for State {}
 
 /// Represents a linear expression of the form:
 ///     c₁·x₁ + c₂·x₂ + ... + cₙ·xₙ + constant
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct LinearExpr {
     pub terms: Vec<(i32, String)>, // Each term: (coefficient, counter name)
     pub constant: i32,             // Constant added at the end
@@ -73,7 +73,7 @@ impl Goal {
 }
 
 /// A single numeric counter.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Counter {
     pub value: i32,   // Current integer value of the counter
     pub name: String, // Unique identifier for the counter

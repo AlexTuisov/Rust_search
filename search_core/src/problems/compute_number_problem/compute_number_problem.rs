@@ -109,7 +109,7 @@ fn is_twin_prime(n: i32) -> bool {
     is_prime(n) && (is_prime(n - 2) || is_prime(n + 2))
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct State {
     pub initial_set: Vec<i32>, // A fixed initial set of integers
     pub buffers: Vec<i32>,     // A vector of buffers for intermediate results

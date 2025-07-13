@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::fs;
 
 // State holds current airplanes and persons info
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct State {
     pub airplanes: Vec<Airplane>, // list of airplanes and their attributes
     pub persons: Vec<Person>,     // list of persons and their current status
@@ -16,7 +16,7 @@ impl State {}
 impl StateTrait for State {}
 
 // Aircraft characteristics and status
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Airplane {
     pub index: i32,      // unique airplane identifier
     pub slow_burn: i32,  // fuel consumed per distance unit when flying slow
@@ -31,7 +31,7 @@ pub struct Airplane {
 }
 
 // Person status: ground location or onboard
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Person {
     pub location: i32,    // city index if on ground, -1 if onboard
     pub on_airplane: i32, // airplane index if onboard, -1 if on ground

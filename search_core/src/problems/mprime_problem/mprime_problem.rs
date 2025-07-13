@@ -10,7 +10,7 @@ use std::fs;
 // - pleasures: list of Pleasure entities
 // - pains: list of Pain entities
 // - foods: list of available Food items
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct State {
     /// List of all Pleasure entities in the current state
     pleasures: Vec<Pleasure>,
@@ -29,7 +29,7 @@ impl StateTrait for State {}
 // Represents a Food item with:
 // - name: unique identifier string
 // - locale: integer count of how many units are available
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Food {
     /// Unique name of the food item
     name: String,
@@ -41,7 +41,7 @@ pub struct Food {
 // - name: unique identifier for the emotion
 // - harmony: integer measure of current harmony level
 // - craves: list of food names this pleasure currently craves
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Pleasure {
     /// Unique name of the pleasure emotion
     name: String,
@@ -56,7 +56,7 @@ pub struct Pleasure {
 // - harmony: integer measure of current disharmony
 // - craves: list of food names that pain craves
 // - fears: list of pleasure names that this pain fears
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Pain {
     /// Unique name of the pain emotion
     name: String,

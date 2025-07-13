@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
 use std::fs;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct State {
     pub simples: Vec<Simple>,    // list of simple molecules in the state
     pub complexes: Vec<Complex>, // list of complex molecules in the state
@@ -49,7 +49,7 @@ pub struct SynthesisReaction {
     pub prod: i32,               // amount produced by synthesis
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Simple {
     pub name: String,   // identifier of this simple molecule
     pub chosen: bool,   // whether this simple has been chosen
@@ -57,7 +57,7 @@ pub struct Simple {
     pub available: i32, // current available count of this simple
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Complex {
     pub name: String,   // identifier of this complex molecule
     pub available: i32, // current available count of this complex

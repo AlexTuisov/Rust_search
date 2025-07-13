@@ -2,10 +2,10 @@ use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fs;
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct State {
     pub grid: Grid,                             // grid occupancy and dimensions
     pub horizontalcars: Vec<HorizontalCar>,     // all horizontal cars
@@ -17,7 +17,7 @@ pub struct State {
 impl State {}
 impl StateTrait for State {}
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct HorizontalCar {
     pub x: i32,       // leftmost x position
     pub y: i32,       // y (row) coordinate
@@ -57,7 +57,7 @@ impl HorizontalCar {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct VerticalCar {
     pub x: i32,       // column coordinate
     pub y: i32,       // topmost y position
@@ -97,7 +97,7 @@ impl VerticalCar {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct HorizontalTruck {
     pub x: i32,       // leftmost x position
     pub y: i32,       // y (row) coordinate
@@ -137,7 +137,7 @@ impl HorizontalTruck {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct VerticalTruck {
     pub x: i32,       // column coordinate
     pub y: i32,       // topmost y position
@@ -177,11 +177,12 @@ impl VerticalTruck {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Grid {
     pub row_size: i32,
     pub col_size: i32,
-    pub cells: HashMap<String, String>, // now keyed by "(x,y)" strings
+    // Changed cells from HashMap to BTreeMap so that Grid becomes hashable.
+    pub cells: BTreeMap<String, String>, // now keyed by "(x,y)" strings
 }
 
 impl Grid {
@@ -189,7 +190,7 @@ impl Grid {
         Grid {
             row_size,
             col_size,
-            cells: HashMap::new(),
+            cells: BTreeMap::new(),
         }
     }
 
@@ -235,14 +236,14 @@ impl RedCarProblem {
         let mut actions = Vec::new();
         for car in &state.horizontalcars {
             if car.can_move("right", &state.grid) {
-                let mut params = HashMap::new();
+                let mut params = std::collections::HashMap::new();
                 let name = format!("{}_move_right", car.name);
                 params.insert("vehicle".into(), Value::Text(car.name.clone()));
                 params.insert("move".into(), Value::Text("right".into()));
                 actions.push(Action::new(name, 1, params));
             }
             if car.can_move("left", &state.grid) {
-                let mut params = HashMap::new();
+                let mut params = std::collections::HashMap::new();
                 let name = format!("{}_move_left", car.name);
                 params.insert("vehicle".into(), Value::Text(car.name.clone()));
                 params.insert("move".into(), Value::Text("left".into()));
@@ -257,14 +258,14 @@ impl RedCarProblem {
         let mut actions = Vec::new();
         for car in &state.verticalcars {
             if car.can_move("up", &state.grid) {
-                let mut params = HashMap::new();
+                let mut params = std::collections::HashMap::new();
                 let name = format!("{}_move_up", car.name);
                 params.insert("vehicle".into(), Value::Text(car.name.clone()));
                 params.insert("move".into(), Value::Text("up".into()));
                 actions.push(Action::new(name, 1, params));
             }
             if car.can_move("down", &state.grid) {
-                let mut params = HashMap::new();
+                let mut params = std::collections::HashMap::new();
                 let name = format!("{}_move_down", car.name);
                 params.insert("vehicle".into(), Value::Text(car.name.clone()));
                 params.insert("move".into(), Value::Text("down".into()));
@@ -279,14 +280,14 @@ impl RedCarProblem {
         let mut actions = Vec::new();
         for truck in &state.horizontaltrucks {
             if truck.can_move("right", &state.grid) {
-                let mut params = HashMap::new();
+                let mut params = std::collections::HashMap::new();
                 let name = format!("{}_move_right", truck.name);
                 params.insert("vehicle".into(), Value::Text(truck.name.clone()));
                 params.insert("move".into(), Value::Text("right".into()));
                 actions.push(Action::new(name, 1, params));
             }
             if truck.can_move("left", &state.grid) {
-                let mut params = HashMap::new();
+                let mut params = std::collections::HashMap::new();
                 let name = format!("{}_move_left", truck.name);
                 params.insert("vehicle".into(), Value::Text(truck.name.clone()));
                 params.insert("move".into(), Value::Text("left".into()));
@@ -301,14 +302,14 @@ impl RedCarProblem {
         let mut actions = Vec::new();
         for truck in &state.verticaltrucks {
             if truck.can_move("up", &state.grid) {
-                let mut params = HashMap::new();
+                let mut params = std::collections::HashMap::new();
                 let name = format!("{}_move_up", truck.name);
                 params.insert("vehicle".into(), Value::Text(truck.name.clone()));
                 params.insert("move".into(), Value::Text("up".into()));
                 actions.push(Action::new(name, 1, params));
             }
             if truck.can_move("down", &state.grid) {
-                let mut params = HashMap::new();
+                let mut params = std::collections::HashMap::new();
                 let name = format!("{}_move_down", truck.name);
                 params.insert("vehicle".into(), Value::Text(truck.name.clone()));
                 params.insert("move".into(), Value::Text("down".into()));

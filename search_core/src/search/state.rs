@@ -37,4 +37,4 @@ pub enum Value {
     MapToMapToString(BTreeMap<String, BTreeMap<String, String>>),
 }
 
-pub trait StateTrait: Debug + Clone + Serialize + for<'de> Deserialize<'de> + Eq {}
+pub trait StateTrait: Debug + Clone + Serialize + Hash + for<'de> Deserialize<'de> + Eq {}

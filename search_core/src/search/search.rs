@@ -3,9 +3,12 @@ use crate::search::action::Action;
 use crate::search::search_tree::SearchTree;
 use crate::search::state::StateTrait;
 use std::collections::HashSet;
+use std::hash::{Hash, Hasher};
+use std::collections::hash_map::DefaultHasher;
+
 
 // Generic search function that operates on a SearchTree and uses a priority queue for the search strategy
-use serde_cbor::to_vec;
+
 
 pub fn generic_search<F, G, H, Q, I, S>(
     tree: &mut SearchTree<S>,
@@ -21,10 +24,10 @@ where
     H: Fn(&S) -> bool,
     Q: PriorityQueue,
     I: Fn(&S) -> f64,
-    S: StateTrait + serde::Serialize,
+    S: StateTrait + Hash,
 {
     queue.insert(0, 0, f64::MAX);
-    let mut closed_list = HashSet::new();
+    let mut closed_list: HashSet<u64> = HashSet::new();
     let mut node_count = 0;
     let mut unique_node_count = 0;
 
@@ -34,14 +37,13 @@ where
             node_count += 1;
             let successor_node = tree.get_node(successor_index).unwrap();
 
-            // Serialize the state for closed list checks
-            let serialized_state = match to_vec(&successor_node.state) {
-                Ok(bytes) => bytes,
-                Err(_) => return Err("Failed to serialize state"),
-            };
+            // Hash the state for the closed list
+            let mut hasher = DefaultHasher::new();
+            successor_node.state.hash(&mut hasher);
+            let state_hash = hasher.finish();
 
             // Check if the state is already in the closed list
-            if !closed_list.insert(serialized_state) {
+            if !closed_list.insert(state_hash) {
                 continue;
             }
 

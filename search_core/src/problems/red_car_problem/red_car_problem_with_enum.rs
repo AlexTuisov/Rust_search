@@ -2,40 +2,40 @@ use crate::problems::problem::Problem;
 use crate::search::{action::Action, state::StateTrait, state::Value};
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs;
 
 // --- Vehicle Types Unified in an Enum ---
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct HorizontalCar {
     pub x: i32,       // leftmost x coordinate of the car
     pub y: i32,       // y coordinate (row) of the car
     pub name: String, // unique vehicle identifier
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct VerticalCar {
     pub x: i32,       // x coordinate (column) of the car
     pub y: i32,       // topmost y coordinate of the car
     pub name: String, // unique vehicle identifier
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct HorizontalTruck {
     pub x: i32,       // leftmost x coordinate of the truck
     pub y: i32,       // y coordinate (row) of the truck
     pub name: String, // unique vehicle identifier
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct VerticalTruck {
     pub x: i32,       // x coordinate (column) of the truck
     pub y: i32,       // topmost y coordinate of the truck
     pub name: String, // unique vehicle identifier
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(tag = "vehicle_type", rename_all = "snake_case")]
 pub enum Vehicle {
     HorizontalCar(HorizontalCar),     // two-cell horizontal vehicle
@@ -160,11 +160,11 @@ impl Vehicle {
 
 // --- Grid Representation ---
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Grid {
     pub row_size: i32,                  // number of rows
     pub col_size: i32,                  // number of columns
-    pub cells: HashMap<String, String>, // map from cell to occupying vehicle name
+    pub cells: BTreeMap<String, String>, // map from cell to occupying vehicle name
 }
 
 impl Grid {
@@ -173,7 +173,7 @@ impl Grid {
         Grid {
             row_size,
             col_size,
-            cells: HashMap::new(),
+            cells: BTreeMap::new(),
         }
     }
 
@@ -198,7 +198,7 @@ impl Grid {
 }
 
 // Unified state using Vehicle enum
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct State {
     pub grid: Grid,             // grid after placement
     pub vehicles: Vec<Vehicle>, // all vehicles in a single vector

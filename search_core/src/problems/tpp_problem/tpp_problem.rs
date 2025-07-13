@@ -3,36 +3,36 @@ use crate::search::{action::Action, state::StateTrait, state::Value};
 use ordered_float::OrderedFloat;
 use serde::{Deserialize, Serialize};
 use serde_json::Value as JsonValue;
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 use std::fs;
 
 // State holds positions of trucks, available markets, and purchase history
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct State {
     trucks: Vec<Truck>,                 // list of all trucks and their locations
     markets: Vec<Market>,               // list of markets and available items
-    items_bought: HashMap<String, i32>, // map: ItemID -> amount already purchased
+    items_bought: BTreeMap<String, i32>, // map: ItemID -> amount already purchased
 }
 
 impl State {}
 impl StateTrait for State {}
 
 // Represents a truck with a unique name and current location
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Truck {
     name: String,     // unique truck identifier
     location: String, // current location of the truck
 }
 
 // Represents a market at a location selling multiple items
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Market {
     location: String,                   // location identifier for this market
-    items: HashMap<String, MarketItem>, // map: ItemID -> details of item for sale
+    items: BTreeMap<String, MarketItem>, // map: ItemID -> details of item for sale
 }
 
 // Details of an item available in a market
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct MarketItem {
     pub on_sale: i32,             // quantity of this item currently on sale
     pub price: OrderedFloat<f64>, // price per unit of this item

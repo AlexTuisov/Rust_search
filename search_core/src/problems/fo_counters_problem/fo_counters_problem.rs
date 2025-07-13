@@ -6,7 +6,7 @@ use std::fs;
 
 /// Represents the state of the world, which consists of a list of counters.
 /// Each counter has a name, value, and rate of change.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct State {
     pub counters: Vec<Counter>,
 }
@@ -78,7 +78,7 @@ impl Goal {
 }
 
 /// A numeric counter with a value and a rate of change per step.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct Counter {
     pub value: i32,
     pub rate_value: i32,
