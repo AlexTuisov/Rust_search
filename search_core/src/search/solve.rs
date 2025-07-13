@@ -14,8 +14,8 @@ where
 {
     let (initial_state, problem) = P::load_state_from_json(json_path);
 
-    let initial_node = Node::new_empty(initial_state.clone());
-    let mut tree = SearchTree::new(initial_node.state.clone());
+    let initial_node = Node::new_root();
+    let mut tree = SearchTree::new(initial_state.clone());
 
     let queue = match search_strategy {
         "A*" => SearchQueue::AStar(AStarQueue::new()),

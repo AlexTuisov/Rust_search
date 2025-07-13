@@ -1,6 +1,6 @@
 use search_core::problems::red_car_problem::red_car_problem::RedCarProblem;
 // use search_core::problems::block_grouping_problem::block_grouping_problem::BlockGroupingProblem;
-// use search_core::problems::compute_number_problem::compute_number_problem::ComputeNumberProblem;
+use search_core::problems::compute_number_problem::compute_number_problem::ComputeNumberProblem;
 // use search_core::problems::counters_expression_problem::counters_expression_problem::CountersExpressionProblem;
 // use search_core::problems::counters_problem::counters_problem::CountersProblem;
 // use search_core::problems::ext_plant_watering_problem::ext_plant_watering_problem::ExtPlantWateringProblem;
@@ -22,9 +22,9 @@ use time::Instant;
 
 fn main() {
     let start_time = Instant::now();
-    solve_problem::<RedCarProblem>(
-        "search_core/src/inputs/red_car_problem/problems_json/pfile4.json",
-        "A*",
+    solve_problem::<ComputeNumberProblem>(
+        "search_core/src/inputs/compute_number_problem/input_1.json",
+        "GBFS",
     );
 
     let elapsed_time = start_time.elapsed(); // Calculate elapsed time

@@ -26,38 +26,33 @@ where
     I: Fn(&S) -> f64,
     S: StateTrait + Hash,
 {
+    use std::collections::{HashSet, hash_map::DefaultHasher};
+    use std::hash::{Hash, Hasher};
+
     queue.insert(0, 0, f64::MAX);
-    let mut closed_list: HashSet<u64> = HashSet::new();
-    let mut node_count = 0;
-    let mut unique_node_count = 0;
+    let mut closed: HashSet<u64> = HashSet::new();
+    let (mut nodes, mut uniq) = (0, 0);
 
-    while let Some(current_index) = queue.pop() {
-        let successors = tree.expand_node(current_index, &get_possible_actions, &apply_action);
-        for &successor_index in &successors {
-            node_count += 1;
-            let successor_node = tree.get_node(successor_index).unwrap();
+    while let Some(cur_idx) = queue.pop() {
+        for &succ_idx in &tree.expand_node(cur_idx, &get_possible_actions, &apply_action) {
+            nodes += 1;
+            let state = tree.get_state(succ_idx).unwrap();
 
-            // Hash the state for the closed list
-            let mut hasher = DefaultHasher::new();
-            successor_node.state.hash(&mut hasher);
-            let state_hash = hasher.finish();
+            // hash-based closed list
+            let mut h = DefaultHasher::new();
+            state.hash(&mut h);
+            if !closed.insert(h.finish()) { continue; }
 
-            // Check if the state is already in the closed list
-            if !closed_list.insert(state_hash) {
-                continue;
+            uniq += 1;
+            if is_goal(state) {
+                println!("nodes: {nodes}, unique: {uniq}");
+                return Ok(tree.trace_actions(succ_idx));
             }
 
-            unique_node_count += 1;
-            if is_goal(&successor_node.state) {
-                println!("Number of nodes created: {}", node_count);
-                println!("Number of unique nodes created: {}", unique_node_count);
-                return Ok(tree.trace_actions(successor_index));
-            }
-
-            let heuristic_value = heuristic(&successor_node.state);
-            queue.insert(successor_index, successor_node.cost, heuristic_value);
+            queue.insert(succ_idx,
+                         tree.get_node(succ_idx).unwrap().cost,
+                         heuristic(state));
         }
     }
-
     Err("No solution found")
 }
